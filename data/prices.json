@@ -1,0 +1,9 @@
+{
+ "source": "https://claude.com/pricing",
+ "read": "2026-11-09",
+ "note": "The page carries no date. US dollars per million tokens, as printed. The cache prices are the 5-minute ones. The page also says batch processing is 50% off; this wall does not use the batch route. Haiku 5.5 is left out on purpose: its price steps up past 100K-token prompts, and one flat rate would under-price those, so the wall refuses it rather than guess.",
+ "models": {
+  "claude-opus-5-5": { "in": 4, "out": 20, "write": 5, "read": 0.2 },
+  "claude-sonnet-5-5": { "in": 2, "out": 10, "write": 2.5, "read": 0.1 }
+ }
+}

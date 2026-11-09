@@ -1,0 +1,43 @@
+{
+ "witness": "v0.6 (sjgant80-hub/witness, tag v0.6)",
+ "command": "witness mutate src/<name>.mjs --timeout 60000 --cap 2000 --test node --test test/wall.test.mjs test/teach.test.mjs test/sim.test.mjs test/audit.test.mjs",
+ "ranOn": "2026-11-09, this laptop; CI re-runs every file on every push and must get these same counts",
+ "kernels": [
+  {
+   "name": "wall",
+   "file": "src/wall.mjs",
+   "sha256": "56932622fcfb126f6664bcd7d1d88775785c6b15b0842aa8826c916a086f4489",
+   "total": 97,
+   "killed": 97,
+   "ignored": 0,
+   "survived": 0
+  },
+  {
+   "name": "teach",
+   "file": "src/teach.mjs",
+   "sha256": "9d7ed4a30074e493111c0723df95b8c3edd405b3a6184a9e03d27137b96340e0",
+   "total": 24,
+   "killed": 24,
+   "ignored": 0,
+   "survived": 0
+  },
+  {
+   "name": "sim",
+   "file": "src/sim.mjs",
+   "sha256": "f31c937b3615589e893cea7fde5e32104b29e7a47eab9bedd24c1b63d5a7eb94",
+   "total": 53,
+   "killed": 53,
+   "ignored": 0,
+   "survived": 0
+  },
+  {
+   "name": "audit",
+   "file": "src/audit.mjs",
+   "sha256": "d1e7daf0bcd9b6bcb5599346f9e29d06cda5479926a7f5b783aca4d093213331",
+   "total": 37,
+   "killed": 37,
+   "ignored": 0,
+   "survived": 0
+  }
+ ]
+}

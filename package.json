@@ -1,0 +1,20 @@
+{
+  "name": "kar-spendwall",
+  "version": "0.1.0",
+  "description": "A spend wall for an AI agent's paid model calls: a daily cap checked before every call, a ceiling on every call, a hard stop, and a ledger an independent auditor re-adds.",
+  "type": "module",
+  "license": "MIT",
+  "author": "sjgant80-hub <sjgant80@gmail.com>",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test test/wall.test.mjs test/teach.test.mjs test/sim.test.mjs test/wire.test.mjs test/page.test.mjs",
+    "simulate": "node tools/simulate.mjs",
+    "check": "node tools/simulate.mjs --check"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "1.7.0"
+  }
+}

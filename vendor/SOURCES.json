@@ -1,0 +1,18 @@
+{
+ "note": "Vendored verbatim, never edited. The page test checks every file here is still these bytes.",
+ "sources": [
+  {
+   "name": "the-wallet's budget check (canDo), as the estate's shared foundation carries it",
+   "from": "https://github.com/sjgant80-hub/the-wallet at 8e786ec5307166f0286a6f75dd1f89d98f061d84, vendored into https://github.com/sjgant80-hub/fall-kit core at b19478fd0dba6af9495afce37cdd1cb3c2861be5 (MIT)",
+   "files": [{ "path": "vendor/wallet/wallet.mjs", "sha256": "9a01dcb6134cdf724e1717b757fca7843544137e0c6051510a1d15682c6166f6" }]
+  },
+  {
+   "name": "kar-tally, the independent ledger auditor",
+   "from": "https://github.com/sjgant80-hub/kar-tally at f55bc2555614037bbdf5ef78e00a6f2d011411bd (MIT)",
+   "files": [
+    { "path": "vendor/kar-tally/kernel.mjs", "sha256": "553245e6363cb6762d8ca5f1df3e213742634054978f7cf3a247c057c2d41b45" },
+    { "path": "vendor/kar-tally/LICENSE", "sha256": "5088f35bf429d7c53f2f8bb89d44db1c28f9dbbb655d6d7b1bd575c73b0ee20e" }
+   ]
+  }
+ ]
+}

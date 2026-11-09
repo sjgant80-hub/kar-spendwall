@@ -1,0 +1,22 @@
+{
+ "wire": {
+  "file": "test/wire.test.mjs",
+  "tests": 4,
+  "pass": 4,
+  "ran": "2026-11-09",
+  "where": "this repository; CI re-runs it on every push"
+ },
+ "scan": {
+  "files": 35,
+  "hits": 0,
+  "ran": "2026-11-09",
+  "where": "every tracked file; CI re-runs it on every push"
+ },
+ "teacher": {
+  "file": "si-didy/patlib-teach.test.mjs",
+  "tests": 4,
+  "pass": 4,
+  "ran": "2026-11-09",
+  "where": "Kar's machine"
+ }
+}

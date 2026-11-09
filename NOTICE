@@ -1,0 +1,14 @@
+kar-spendwall — credits and provenance
+
+vendor/wallet/wallet.mjs: the-wallet's budget check (canDo), from the estate's shared foundation, fall-kit core
+(sjgant80-hub/the-wallet at 8e786ec, via sjgant80-hub/fall-kit at b19478f). MIT.
+vendor/kar-tally/: kar-tally, the independent ledger auditor (sjgant80-hub/kar-tally at f55bc25). MIT; its licence is
+beside it.
+
+Prices: Anthropic's published API prices, read by hand on https://claude.com/pricing on the date in data/prices.json.
+Claude and Anthropic are names of Anthropic; this repository is not theirs. The one dependency is Anthropic's official
+SDK, @anthropic-ai/sdk, pinned to an exact version (see package.json and package-lock.json).
+
+Powered by the Konomi architecture, created by Thomas Frumkin.
+
+The code is MIT licensed (LICENSE).

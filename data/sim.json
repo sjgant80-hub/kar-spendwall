@@ -1,0 +1,842 @@
+{
+ "what": "Sixty simulated days of demand well above the cap, sent through the law exactly as the wire sends a real request: plan before every request, settle after. Nothing was spent.",
+ "settings": {
+  "dayCents": 250,
+  "stopCents": 9500,
+  "creditCents": 10000,
+  "model": "claude-opus-5-5",
+  "effort": "medium",
+  "maxTokens": 6000,
+  "frame": 256,
+  "perNight": 6
+ },
+ "prices": {
+  "source": "https://claude.com/pricing",
+  "read": "2026-11-09"
+ },
+ "seed": 2026,
+ "days": 60,
+ "start": "2026-11-10",
+ "ledger": {
+  "entries": 5033,
+  "sha256": "244add8b4ad39931aff08622bea1581e51c00cce22a044ad457ae1b876ae1d19"
+ },
+ "measured": {
+  "days": [
+   {
+    "day": "2026-11-10",
+    "requests": 64,
+    "asked": 52,
+    "noEvidence": 12,
+    "demandCents": 776,
+    "spentCents": 247,
+    "calls": 31,
+    "refusedDay": 21,
+    "refusedTier": 12,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-11-11",
+    "requests": 63,
+    "asked": 54,
+    "noEvidence": 9,
+    "demandCents": 817,
+    "spentCents": 243,
+    "calls": 33,
+    "refusedDay": 21,
+    "refusedTier": 9,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-11-12",
+    "requests": 56,
+    "asked": 47,
+    "noEvidence": 9,
+    "demandCents": 697,
+    "spentCents": 242,
+    "calls": 34,
+    "refusedDay": 13,
+    "refusedTier": 9,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-11-13",
+    "requests": 56,
+    "asked": 52,
+    "noEvidence": 4,
+    "demandCents": 783,
+    "spentCents": 241,
+    "calls": 32,
+    "refusedDay": 20,
+    "refusedTier": 4,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-11-14",
+    "requests": 77,
+    "asked": 65,
+    "noEvidence": 12,
+    "demandCents": 977,
+    "spentCents": 245,
+    "calls": 33,
+    "refusedDay": 32,
+    "refusedTier": 12,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-11-15",
+    "requests": 61,
+    "asked": 47,
+    "noEvidence": 14,
+    "demandCents": 705,
+    "spentCents": 247,
+    "calls": 35,
+    "refusedDay": 12,
+    "refusedTier": 14,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-11-16",
+    "requests": 80,
+    "asked": 69,
+    "noEvidence": 11,
+    "demandCents": 1031,
+    "spentCents": 241,
+    "calls": 33,
+    "refusedDay": 36,
+    "refusedTier": 11,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-11-17",
+    "requests": 75,
+    "asked": 66,
+    "noEvidence": 9,
+    "demandCents": 995,
+    "spentCents": 240,
+    "calls": 31,
+    "refusedDay": 35,
+    "refusedTier": 9,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-11-18",
+    "requests": 69,
+    "asked": 58,
+    "noEvidence": 11,
+    "demandCents": 867,
+    "spentCents": 241,
+    "calls": 29,
+    "refusedDay": 29,
+    "refusedTier": 11,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-11-19",
+    "requests": 67,
+    "asked": 58,
+    "noEvidence": 9,
+    "demandCents": 873,
+    "spentCents": 243,
+    "calls": 33,
+    "refusedDay": 25,
+    "refusedTier": 9,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-11-20",
+    "requests": 76,
+    "asked": 63,
+    "noEvidence": 13,
+    "demandCents": 942,
+    "spentCents": 245,
+    "calls": 37,
+    "refusedDay": 26,
+    "refusedTier": 13,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-11-21",
+    "requests": 69,
+    "asked": 60,
+    "noEvidence": 9,
+    "demandCents": 898,
+    "spentCents": 244,
+    "calls": 33,
+    "refusedDay": 27,
+    "refusedTier": 9,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-11-22",
+    "requests": 61,
+    "asked": 47,
+    "noEvidence": 14,
+    "demandCents": 711,
+    "spentCents": 239,
+    "calls": 34,
+    "refusedDay": 13,
+    "refusedTier": 14,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-11-23",
+    "requests": 58,
+    "asked": 46,
+    "noEvidence": 12,
+    "demandCents": 683,
+    "spentCents": 244,
+    "calls": 37,
+    "refusedDay": 9,
+    "refusedTier": 12,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-11-24",
+    "requests": 52,
+    "asked": 43,
+    "noEvidence": 9,
+    "demandCents": 646,
+    "spentCents": 239,
+    "calls": 27,
+    "refusedDay": 16,
+    "refusedTier": 9,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-11-25",
+    "requests": 61,
+    "asked": 52,
+    "noEvidence": 9,
+    "demandCents": 789,
+    "spentCents": 244,
+    "calls": 30,
+    "refusedDay": 22,
+    "refusedTier": 9,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-11-26",
+    "requests": 59,
+    "asked": 48,
+    "noEvidence": 11,
+    "demandCents": 710,
+    "spentCents": 241,
+    "calls": 30,
+    "refusedDay": 18,
+    "refusedTier": 11,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-11-27",
+    "requests": 54,
+    "asked": 47,
+    "noEvidence": 7,
+    "demandCents": 701,
+    "spentCents": 238,
+    "calls": 33,
+    "refusedDay": 14,
+    "refusedTier": 7,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-11-28",
+    "requests": 61,
+    "asked": 54,
+    "noEvidence": 7,
+    "demandCents": 814,
+    "spentCents": 243,
+    "calls": 34,
+    "refusedDay": 20,
+    "refusedTier": 7,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-11-29",
+    "requests": 71,
+    "asked": 54,
+    "noEvidence": 17,
+    "demandCents": 812,
+    "spentCents": 246,
+    "calls": 34,
+    "refusedDay": 20,
+    "refusedTier": 17,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-11-30",
+    "requests": 53,
+    "asked": 45,
+    "noEvidence": 8,
+    "demandCents": 667,
+    "spentCents": 241,
+    "calls": 34,
+    "refusedDay": 11,
+    "refusedTier": 8,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-12-01",
+    "requests": 61,
+    "asked": 47,
+    "noEvidence": 14,
+    "demandCents": 701,
+    "spentCents": 238,
+    "calls": 38,
+    "refusedDay": 9,
+    "refusedTier": 14,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-12-02",
+    "requests": 58,
+    "asked": 48,
+    "noEvidence": 10,
+    "demandCents": 715,
+    "spentCents": 241,
+    "calls": 32,
+    "refusedDay": 16,
+    "refusedTier": 10,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-12-03",
+    "requests": 79,
+    "asked": 68,
+    "noEvidence": 11,
+    "demandCents": 1018,
+    "spentCents": 245,
+    "calls": 29,
+    "refusedDay": 39,
+    "refusedTier": 11,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-12-04",
+    "requests": 60,
+    "asked": 55,
+    "noEvidence": 5,
+    "demandCents": 812,
+    "spentCents": 238,
+    "calls": 30,
+    "refusedDay": 25,
+    "refusedTier": 5,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-12-05",
+    "requests": 62,
+    "asked": 49,
+    "noEvidence": 13,
+    "demandCents": 735,
+    "spentCents": 240,
+    "calls": 37,
+    "refusedDay": 12,
+    "refusedTier": 13,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-12-06",
+    "requests": 56,
+    "asked": 44,
+    "noEvidence": 12,
+    "demandCents": 673,
+    "spentCents": 244,
+    "calls": 29,
+    "refusedDay": 15,
+    "refusedTier": 12,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-12-07",
+    "requests": 69,
+    "asked": 59,
+    "noEvidence": 10,
+    "demandCents": 885,
+    "spentCents": 238,
+    "calls": 34,
+    "refusedDay": 25,
+    "refusedTier": 10,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-12-08",
+    "requests": 63,
+    "asked": 54,
+    "noEvidence": 9,
+    "demandCents": 807,
+    "spentCents": 240,
+    "calls": 32,
+    "refusedDay": 22,
+    "refusedTier": 9,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-12-09",
+    "requests": 51,
+    "asked": 44,
+    "noEvidence": 7,
+    "demandCents": 656,
+    "spentCents": 240,
+    "calls": 31,
+    "refusedDay": 13,
+    "refusedTier": 7,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-12-10",
+    "requests": 56,
+    "asked": 46,
+    "noEvidence": 10,
+    "demandCents": 691,
+    "spentCents": 241,
+    "calls": 32,
+    "refusedDay": 14,
+    "refusedTier": 10,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-12-11",
+    "requests": 75,
+    "asked": 62,
+    "noEvidence": 13,
+    "demandCents": 927,
+    "spentCents": 244,
+    "calls": 31,
+    "refusedDay": 31,
+    "refusedTier": 13,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-12-12",
+    "requests": 71,
+    "asked": 62,
+    "noEvidence": 9,
+    "demandCents": 927,
+    "spentCents": 242,
+    "calls": 34,
+    "refusedDay": 28,
+    "refusedTier": 9,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-12-13",
+    "requests": 69,
+    "asked": 62,
+    "noEvidence": 7,
+    "demandCents": 931,
+    "spentCents": 241,
+    "calls": 30,
+    "refusedDay": 32,
+    "refusedTier": 7,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-12-14",
+    "requests": 70,
+    "asked": 60,
+    "noEvidence": 10,
+    "demandCents": 886,
+    "spentCents": 240,
+    "calls": 31,
+    "refusedDay": 29,
+    "refusedTier": 10,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-12-15",
+    "requests": 53,
+    "asked": 49,
+    "noEvidence": 4,
+    "demandCents": 740,
+    "spentCents": 238,
+    "calls": 30,
+    "refusedDay": 19,
+    "refusedTier": 4,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-12-16",
+    "requests": 67,
+    "asked": 60,
+    "noEvidence": 7,
+    "demandCents": 906,
+    "spentCents": 246,
+    "calls": 34,
+    "refusedDay": 26,
+    "refusedTier": 7,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-12-17",
+    "requests": 50,
+    "asked": 44,
+    "noEvidence": 6,
+    "demandCents": 657,
+    "spentCents": 240,
+    "calls": 32,
+    "refusedDay": 12,
+    "refusedTier": 6,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-12-18",
+    "requests": 61,
+    "asked": 49,
+    "noEvidence": 12,
+    "demandCents": 730,
+    "spentCents": 242,
+    "calls": 34,
+    "refusedDay": 15,
+    "refusedTier": 12,
+    "refusedStop": 0
+   },
+   {
+    "day": "2026-12-19",
+    "requests": 52,
+    "asked": 47,
+    "noEvidence": 5,
+    "demandCents": 693,
+    "spentCents": 58,
+    "calls": 8,
+    "refusedDay": 0,
+    "refusedTier": 5,
+    "refusedStop": 39
+   },
+   {
+    "day": "2026-12-20",
+    "requests": 69,
+    "asked": 57,
+    "noEvidence": 12,
+    "demandCents": 862,
+    "spentCents": 0,
+    "calls": 0,
+    "refusedDay": 0,
+    "refusedTier": 12,
+    "refusedStop": 57
+   },
+   {
+    "day": "2026-12-21",
+    "requests": 66,
+    "asked": 57,
+    "noEvidence": 9,
+    "demandCents": 869,
+    "spentCents": 0,
+    "calls": 0,
+    "refusedDay": 0,
+    "refusedTier": 9,
+    "refusedStop": 57
+   },
+   {
+    "day": "2026-12-22",
+    "requests": 61,
+    "asked": 52,
+    "noEvidence": 9,
+    "demandCents": 773,
+    "spentCents": 0,
+    "calls": 0,
+    "refusedDay": 0,
+    "refusedTier": 9,
+    "refusedStop": 52
+   },
+   {
+    "day": "2026-12-23",
+    "requests": 79,
+    "asked": 63,
+    "noEvidence": 16,
+    "demandCents": 945,
+    "spentCents": 0,
+    "calls": 0,
+    "refusedDay": 0,
+    "refusedTier": 16,
+    "refusedStop": 63
+   },
+   {
+    "day": "2026-12-24",
+    "requests": 66,
+    "asked": 61,
+    "noEvidence": 5,
+    "demandCents": 911,
+    "spentCents": 0,
+    "calls": 0,
+    "refusedDay": 0,
+    "refusedTier": 5,
+    "refusedStop": 61
+   },
+   {
+    "day": "2026-12-25",
+    "requests": 69,
+    "asked": 61,
+    "noEvidence": 8,
+    "demandCents": 915,
+    "spentCents": 0,
+    "calls": 0,
+    "refusedDay": 0,
+    "refusedTier": 8,
+    "refusedStop": 61
+   },
+   {
+    "day": "2026-12-26",
+    "requests": 63,
+    "asked": 54,
+    "noEvidence": 9,
+    "demandCents": 820,
+    "spentCents": 0,
+    "calls": 0,
+    "refusedDay": 0,
+    "refusedTier": 9,
+    "refusedStop": 54
+   },
+   {
+    "day": "2026-12-27",
+    "requests": 51,
+    "asked": 45,
+    "noEvidence": 6,
+    "demandCents": 676,
+    "spentCents": 0,
+    "calls": 0,
+    "refusedDay": 0,
+    "refusedTier": 6,
+    "refusedStop": 45
+   },
+   {
+    "day": "2026-12-28",
+    "requests": 71,
+    "asked": 62,
+    "noEvidence": 9,
+    "demandCents": 933,
+    "spentCents": 0,
+    "calls": 0,
+    "refusedDay": 0,
+    "refusedTier": 9,
+    "refusedStop": 62
+   },
+   {
+    "day": "2026-12-29",
+    "requests": 56,
+    "asked": 48,
+    "noEvidence": 8,
+    "demandCents": 728,
+    "spentCents": 0,
+    "calls": 0,
+    "refusedDay": 0,
+    "refusedTier": 8,
+    "refusedStop": 48
+   },
+   {
+    "day": "2026-12-30",
+    "requests": 55,
+    "asked": 49,
+    "noEvidence": 6,
+    "demandCents": 730,
+    "spentCents": 0,
+    "calls": 0,
+    "refusedDay": 0,
+    "refusedTier": 6,
+    "refusedStop": 49
+   },
+   {
+    "day": "2026-12-31",
+    "requests": 75,
+    "asked": 57,
+    "noEvidence": 18,
+    "demandCents": 868,
+    "spentCents": 0,
+    "calls": 0,
+    "refusedDay": 0,
+    "refusedTier": 18,
+    "refusedStop": 57
+   },
+   {
+    "day": "2027-01-01",
+    "requests": 65,
+    "asked": 49,
+    "noEvidence": 16,
+    "demandCents": 745,
+    "spentCents": 0,
+    "calls": 0,
+    "refusedDay": 0,
+    "refusedTier": 16,
+    "refusedStop": 49
+   },
+   {
+    "day": "2027-01-02",
+    "requests": 56,
+    "asked": 54,
+    "noEvidence": 2,
+    "demandCents": 800,
+    "spentCents": 0,
+    "calls": 0,
+    "refusedDay": 0,
+    "refusedTier": 2,
+    "refusedStop": 54
+   },
+   {
+    "day": "2027-01-03",
+    "requests": 58,
+    "asked": 48,
+    "noEvidence": 10,
+    "demandCents": 726,
+    "spentCents": 0,
+    "calls": 0,
+    "refusedDay": 0,
+    "refusedTier": 10,
+    "refusedStop": 48
+   },
+   {
+    "day": "2027-01-04",
+    "requests": 59,
+    "asked": 52,
+    "noEvidence": 7,
+    "demandCents": 789,
+    "spentCents": 0,
+    "calls": 0,
+    "refusedDay": 0,
+    "refusedTier": 7,
+    "refusedStop": 52
+   },
+   {
+    "day": "2027-01-05",
+    "requests": 56,
+    "asked": 49,
+    "noEvidence": 7,
+    "demandCents": 744,
+    "spentCents": 0,
+    "calls": 0,
+    "refusedDay": 0,
+    "refusedTier": 7,
+    "refusedStop": 49
+   },
+   {
+    "day": "2027-01-06",
+    "requests": 71,
+    "asked": 61,
+    "noEvidence": 10,
+    "demandCents": 923,
+    "spentCents": 0,
+    "calls": 0,
+    "refusedDay": 0,
+    "refusedTier": 10,
+    "refusedStop": 61
+   },
+   {
+    "day": "2027-01-07",
+    "requests": 57,
+    "asked": 52,
+    "noEvidence": 5,
+    "demandCents": 786,
+    "spentCents": 0,
+    "calls": 0,
+    "refusedDay": 0,
+    "refusedTier": 5,
+    "refusedStop": 52
+   },
+   {
+    "day": "2027-01-08",
+    "requests": 61,
+    "asked": 51,
+    "noEvidence": 10,
+    "demandCents": 768,
+    "spentCents": 0,
+    "calls": 0,
+    "refusedDay": 0,
+    "refusedTier": 10,
+    "refusedStop": 51
+   }
+  ],
+  "k1": {
+   "requestsWithoutEvidence": 572,
+   "refusedForTier": 572,
+   "reachedTheApi": 0
+  },
+  "k2": {
+   "capCents": 250,
+   "dearestDayCents": 247,
+   "cheapestDemandCents": 646,
+   "refusedForDay": 822,
+   "settledBeforeReserved": 0
+  },
+  "k3": {
+   "stopCents": 9500,
+   "totalCents": 9490,
+   "refusedForStop": 1121,
+   "firstOffDay": "2026-12-19",
+   "callsAfterOff": 0
+  },
+  "k4": {
+   "entries": 5033,
+   "calls": 1275,
+   "settled": 1243,
+   "unsettled": 32,
+   "refused": 2515,
+   "skipped": 0,
+   "tally": "PASS",
+   "tallyViolations": 0,
+   "tallyTotalCents": 9490,
+   "wallTotalCents": 9490
+  },
+  "o": {
+   "overruns": 0
+  },
+  "brief": "API tier OFF: $94.90 of the $100.00 credit is spent (Kar stops at $95.00); Kar runs on the free tiers until Simon raises the stop · 1275 calls, 2515 refused · by job: teacher $94.90 · 32 unsettled, counted at the ceiling"
+ },
+ "verdicts": [
+  {
+   "id": "K1",
+   "what": "no request without evidence reaches the API",
+   "pass": true
+  },
+  {
+   "id": "K2",
+   "what": "no day over the cap, the cap really bit, and nothing settled before it was reserved",
+   "pass": true
+  },
+  {
+   "id": "K3",
+   "what": "the total stays under the stop, and nothing is called once the tier is off",
+   "pass": true
+  },
+  {
+   "id": "K4",
+   "what": "every attempt is in the ledger and kar-tally re-adds it to the same total",
+   "pass": true
+  },
+  {
+   "id": "O",
+   "what": "no call cost more than its ceiling",
+   "pass": true
+  }
+ ],
+ "audit": {
+  "calls": 1275,
+  "refused": 2515,
+  "totalCents": 9490,
+  "rows": [
+   {
+    "id": "K1",
+    "pass": true,
+    "measured": "0 of 1275 calls without the evidence"
+   },
+   {
+    "id": "K2",
+    "pass": true,
+    "measured": "no day over its cap, 0 settled before reserved"
+   },
+   {
+    "id": "K3",
+    "pass": true,
+    "measured": "$94.90 charged, the stop $95.00, 0 calls after a refusal at the stop"
+   },
+   {
+    "id": "K4",
+    "pass": true,
+    "measured": "kar-tally PASS, $94.90 re-added of $94.90, 0 unreadable lines"
+   },
+   {
+    "id": "O",
+    "pass": true,
+    "measured": "0 overruns"
+   }
+  ]
+ }
+}

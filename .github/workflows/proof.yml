@@ -1,0 +1,27 @@
+name: proof
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - run: npm ci
+      - name: the law, the job, the harness, the audit, the wire end to end, the page
+        run: node --test test/wall.test.mjs test/teach.test.mjs test/sim.test.mjs test/audit.test.mjs test/wire.test.mjs test/page.test.mjs
+      - name: sixty days re-derived byte for byte (R)
+        run: node tools/simulate.mjs --check
+      - name: no key-shaped string in any tracked file (K6)
+        run: node tools/scan.mjs
+      - name: the wire's receipt re-derives (K6)
+        run: node tools/receipts.mjs --check
+      # Pinned. An unpinned gate is a gate somebody else can change.
+      - name: witness - every mutant of every law file must die, and the committed counts must re-derive (W)
+        run: |
+          git clone --depth 1 --branch v0.6 https://github.com/sjgant80-hub/witness.git /tmp/witness
+          for n in wall teach sim audit; do
+            node /tmp/witness/witness.mjs mutate "src/$n.mjs" --timeout 60000 --cap 2000 --test node --test test/wall.test.mjs test/teach.test.mjs test/sim.test.mjs test/audit.test.mjs > "/tmp/w-$n.json" || true
+            node tools/witness-check.mjs "$n" "/tmp/w-$n.json"
+          done
