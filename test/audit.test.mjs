@@ -23,7 +23,7 @@ test('an empty ledger and an honest one pass every row', () => {
   assert.deepEqual(a.rows.map((r) => r.id), ['K1', 'K2', 'K3', 'K4', 'O']);
   assert.ok(a.rows.every((r) => r.pass));
   assert.deepEqual(a.rows.map((r) => r.measured), ['0 of 2 calls without the evidence', 'no day over its cap, 0 settled before reserved',
-    '$0.17 charged, the stop $95.00, 0 calls after a refusal at the stop', 'kar-tally PASS, $0.17 re-added of $0.17, 0 unreadable lines', '0 overruns']);
+    '$0.17 charged, the stop $95.00, 0 calls after a refusal at the stop', 'kar-tally PASS, $0.17 re-added of $0.17, 0 unreadable lines', '0 overruns; no answered call yet to check the one-token-per-byte bound on']);
   const sim = S.run({ prices: PRICES, days: 45 });
   assert.ok(audit(sim.ledger, verifyLedger).rows.every((r) => r.pass), 'the simulated ledger passes the real audit too');
 });
@@ -66,7 +66,20 @@ test('K4 and O: an unreadable line, an overrun; kar-tally re-adds past a raised 
   assert.equal(pass([res(1, 14), null]).K4, false);
   assert.equal(rows([res(1, 14), 'junk']).K4.measured, 'kar-tally PASS, $0.14 re-added of $0.14, 1 unreadable lines');
   assert.equal(pass([res(1, 14), set(1, 15)]).O, false);
-  assert.equal(rows([res(1, 14), set(1, 15)]).O.measured, '1 overruns');
+  assert.equal(rows([res(1, 14), set(1, 15)]).O.measured, '1 overruns; no answered call yet to check the one-token-per-byte bound on');
+  // the one assumption under the ceiling, checked on every answered call: input tokens never more than bytes + 256
+  const tok = (n) => [res(1, 14, { bytes: 100 }), { ...set(1, 3), tokens: { in: n, out: 1, write: 0, read: 0 } }];
+  assert.equal(pass(tok(356)).O, true);
+  assert.equal(rows(tok(356)).O.measured, '0 overruns; 0 of 1 answered calls read more input tokens than bytes plus the allowance (the ceiling assumes none do)');
+  assert.equal(pass(tok(357)).O, false);
+  // a call with a size but no answer yet, or an answer but no size, is not an answered call to check the bound on
+  assert.equal(rows([res(1, 14, { bytes: 100 })]).O.measured, '0 overruns; no answered call yet to check the one-token-per-byte bound on');
+  assert.equal(pass([res(1, 14), { ...set(1, 3), tokens: { in: 900, out: 1, write: 0, read: 0 } }]).O, true);
+  assert.equal(rows(tok(357)).O.measured, '0 overruns; 1 of 1 answered calls read more input tokens than bytes plus the allowance (the ceiling assumes none do)');
+  // a line deleted from the ledger is a gap in the numbering, and kar-tally fails it
+  assert.equal(pass([res(1, 14), { seq: 2, kind: 'refuse', code: 'day', stopCents: 9500 }, res(3, 14)]).K4, true);
+  assert.equal(pass([res(1, 14), res(3, 14)]).K4, false);
+  assert.match(rows([res(1, 14), res(3, 14)]).K4.measured, /^kar-tally FAIL/);
   const big = [res(1, 9000, { stopCents: 20000 }), res(2, 9000, { stopCents: 20000, day: '2026-11-11', at: at(11) })];
   assert.equal(pass(big).K4, true, 'kar-tally is given the stop in force as its cap');
   assert.equal(pass([res(1, 100, { stopCents: 'x' })]).K4, true);

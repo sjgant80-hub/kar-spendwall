@@ -33,12 +33,15 @@ test('P: no measured number is typed into the page', () => {
   for (const s of forms) assert.equal(visible.includes(s), false, 'the page has "' + s + '" typed in; it must come from the receipts');
   for (const s of [usd(sim.settings.dayCents), usd(sim.settings.stopCents)]) assert.equal(visible.includes(s), false, 'settings are read from the record too: ' + s);
   assert.match(app, /json\('data\/sim\.json'\)/);
-  assert.match(app, /pass \? 'HELD' : 'FAILED'/);
+  assert.match(app, /chip\(pass, 'HELD', 'FAILED'/);
+  assert.match(app, /await checkP\(\)/, 'P is decided in the browser too');
+  assert.match(app, /await checkR\(\)/, 'R is decided in the browser too');
+  assert.match(app, /REAL\.calls === 0 \? '<span class="chip wait">NO CALL YET<\/span>'/,'the real ledger is never shown as held before it has a call');
   assert.equal(/\$\s?\d/.test(visible), false, 'no dollar figure typed into the page');
 });
 
 test('the page explains itself, talks only to itself, and carries its credits', () => {
-  for (const id of ['result', 'watch', 'try', 'what', 'words', 'start', 'how', 'blueprint', 'contract', 'adoption', 'pilot', 'paper', 'business']) assert.match(html, new RegExp('<section id="' + id + '"'), id);
+  for (const id of ['result', 'watch', 'try', 'what', 'threat', 'words', 'start', 'how', 'blueprint', 'contract', 'adoption', 'pilot', 'paper', 'business']) assert.match(html, new RegExp('<section id="' + id + '"'), id);
   assert.match(html, /A claim that misses its bar is kept and shown as failed\./);
   assert.match(html, /connect-src 'self'/);
   assert.match(html, /Powered by the Konomi architecture, created by Thomas Frumkin/);
@@ -46,7 +49,7 @@ test('the page explains itself, talks only to itself, and carries its credits', 
   assert.equal(/£\s?\d|per seat|\/mo\b/i.test(visible), false, 'no price of ours on the page');
   assert.equal(/my-estate-graph|https?:\/\/(?!www\.ai-nativesolutions\.com|github\.com\/sjgant80-hub\/kar-spendwall)/.test(html.replace(/xmlns="[^"]*"|const svgNS = '[^']*'/g, '')), false, 'no address but the supplier and the source');
   assert.equal(W.findSecrets(html + app), 0);
-  for (const f of ['CLAIMS.md', 'LICENSE', 'NOTICE', 'README.md', 'data/prices.json', 'data/sim.json', 'data/witness.json', 'data/proofs.json']) assert.ok(existsSync(new URL(f, ROOT)), f);
+  for (const f of ['CLAIMS.md', 'LICENSE', 'NOTICE', 'README.md', 'data/prices.json', 'data/sim.json', 'data/witness.json', 'data/proofs.json', 'data/real.json']) assert.ok(existsSync(new URL(f, ROOT)), f);
 });
 
 test('the wire keeps its promises in its own source: one address, no retry, the environment ignored', () => {
@@ -56,6 +59,9 @@ test('the wire keeps its promises in its own source: one address, no retry, the 
   assert.ok(addrs.every((a) => a === 'https://api.anthropic.com' || a === 'http://127.0.0.1:'), addrs.join(' '));
   assert.match(ask, /if \(k\.toUpperCase\(\)\.startsWith\('ANTHROPIC_'\)\) delete process\.env\[k\]/);
   assert.match(ask, /maxRetries: 0/);
+  assert.match(ask, /const DIR = LOOP < 0 \? REAL_DIR : /, 'for real, the ledger is at its fixed place');
+  assert.match(ask, /const KEYFILE = LOOP < 0 \? REAL_KEY : /, 'for real, the key is at its fixed place');
+  assert.match(ask, /same\(KEYFILE, REAL_KEY\) \|\| same\(DIR, REAL_DIR\)/, 'the test mode refuses the real key and the real ledger');
   assert.match(ask, /new Anthropic\(\{ apiKey: key, baseURL: endpoint, maxRetries: 0, timeout: 240000 \}\)/);
   const at = (s) => ask.indexOf(s);
   assert.ok(at('append(p.entry)') > 0 && at('append(p.entry)') < at('readFileSync(KEYFILE'), 'the plan is on disk before the key is read');

@@ -16,7 +16,8 @@ const TEACH = 'C:/Users/sjgan/si-didy/patlib-teach.test.mjs';
 const count = (out, what) => Number((String(out).match(new RegExp('^# ' + what + ' (\\d+)$', 'm')) || [])[1] ?? NaN);
 const run = (file, cwd) => {
   const r = spawnSync(process.execPath, ['--test', '--test-reporter=tap', file], { cwd, encoding: 'utf8', timeout: 600000 });
-  return { tests: count(r.stdout, 'tests'), pass: count(r.stdout, 'pass') };
+  const names = [...String(r.stdout).matchAll(/^ok \d+ - (.+)$/gm)].map((m) => m[1].trim());
+  return { tests: count(r.stdout, 'tests'), pass: count(r.stdout, 'pass'), names };
 };
 const scan = () => {
   const files = execFileSync('git', ['ls-files', '-z'], { cwd: ROOT, encoding: 'utf8' }).split('\0').filter(Boolean);

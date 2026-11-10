@@ -2,7 +2,7 @@
 // kar-spendwall · tools/audit.mjs — the real ledger (~/.si-didy/api/ledger.jsonl, or a path given), judged by the claims'
 // own bars and re-added by kar-tally, plus the morning line. Local only: it reads one file and prints.
 //   node tools/audit.mjs [ledger.jsonl] [--json]
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 import A from '../src/audit.mjs';
@@ -16,6 +16,12 @@ try { L = readFileSync(file, 'utf8').split(/\r?\n/).filter(Boolean).map((l) => {
 let settings = {};
 try { settings = JSON.parse(readFileSync(join(DIR, 'settings.json'), 'utf8')); } catch {}
 const a = A.audit(L, verifyLedger), line = W.brief(L, settings, new Date().toISOString());
+// --write: the receipt the page shows (data/real.json): counts, totals and each row's verdict; never a prompt, an
+// answer, the evidence or the key, which the ledger keeps on this machine only
+if (process.argv.includes('--write')) {
+  const out = { at: new Date().toISOString().slice(0, 10), present: existsSync(file), calls: a.calls, refused: a.refused, totalCents: a.totalCents, rows: a.rows };
+  writeFileSync(new URL('../data/real.json', import.meta.url), JSON.stringify(out, null, 1) + '\n');
+}
 if (process.argv.includes('--json')) console.log(JSON.stringify({ file, brief: line, ...a }));
 else {
   console.log(line);

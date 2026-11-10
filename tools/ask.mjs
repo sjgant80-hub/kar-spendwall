@@ -11,25 +11,30 @@
 // can take part.
 import Anthropic from '@anthropic-ai/sdk';
 import { readFileSync, openSync, writeSync, fsyncSync, closeSync, existsSync, mkdirSync, unlinkSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { homedir } from 'node:os';
 import W from '../src/wall.mjs';
 
 for (const k of Object.keys(process.env)) if (k.toUpperCase().startsWith('ANTHROPIC_')) delete process.env[k];
 
+// Two modes. For real: the ledger and the key are at their fixed places and the request goes to Anthropic; nothing in
+// the environment can move them, so no variable can start a fresh, empty ledger or point the key somewhere else.
+// For this repository's own test (--loopback PORT): the request goes to 127.0.0.1, the ledger and a FAKE key come from
+// KAR_SPENDWALL_DIR and KAR_SPENDWALL_KEYFILE, and the real key file is refused, so the real key never leaves for a port.
 const HOME = homedir();
-const DIR = process.env.KAR_SPENDWALL_DIR || join(HOME, '.si-didy', 'api');
-const KEYFILE = process.env.KAR_SPENDWALL_KEYFILE || join(HOME, '.si-didy', 'keys', 'anthropic-api.key');
+const REAL_DIR = join(HOME, '.si-didy', 'api'), REAL_KEY = join(HOME, '.si-didy', 'keys', 'anthropic-api.key');
+const LOOP = process.argv.indexOf('--loopback');
+const endpoint = (() => {
+  if (LOOP < 0) return 'https://api.anthropic.com';
+  const port = Number(process.argv[LOOP + 1]);
+  return Number.isInteger(port) && port > 0 && port < 65536 ? 'http://127.0.0.1:' + port : null;
+})();
+const DIR = LOOP < 0 ? REAL_DIR : process.env.KAR_SPENDWALL_DIR || '';
+const KEYFILE = LOOP < 0 ? REAL_KEY : process.env.KAR_SPENDWALL_KEYFILE || '';
 const LEDGER = join(DIR, 'ledger.jsonl'), SETTINGS = join(DIR, 'settings.json'), LOCK = join(DIR, 'ledger.lock');
 const PRICES = JSON.parse(readFileSync(new URL('../data/prices.json', import.meta.url), 'utf8'));
 const out = (o) => process.stdout.write(JSON.stringify(o) + '\n');
-
-const endpoint = (() => {
-  const i = process.argv.indexOf('--loopback');
-  if (i < 0) return 'https://api.anthropic.com';
-  const port = Number(process.argv[i + 1]);
-  return Number.isInteger(port) && port > 0 && port < 65536 ? 'http://127.0.0.1:' + port : null;
-})();
+const same = (a, b) => resolve(a).toLowerCase() === resolve(b).toLowerCase();
 const rd = (p, fb) => { try { return JSON.parse(readFileSync(p, 'utf8')); } catch { return fb; } };
 const ledger = () => {
   let text = '';
@@ -50,6 +55,10 @@ const scrub = (s, key) => (key ? String(s).split(key).join('[the key]') : String
 
 async function main() {
   if (endpoint === null) { out({ ok: false, code: 'args', why: '--loopback needs a port' }); process.exitCode = 2; return; }
+  if (LOOP >= 0 && (!DIR || !KEYFILE || same(KEYFILE, REAL_KEY) || same(DIR, REAL_DIR))) {
+    out({ ok: false, code: 'args', why: '--loopback is for the test: it needs its own ledger folder and a fake key, never the real ones' });
+    process.exitCode = 2; return;
+  }
   mkdirSync(DIR, { recursive: true });
   let req = null;
   try { req = JSON.parse(readFileSync(0, 'utf8')); } catch {}

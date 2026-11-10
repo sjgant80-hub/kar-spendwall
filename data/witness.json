@@ -6,9 +6,9 @@
   {
    "name": "wall",
    "file": "src/wall.mjs",
-   "sha256": "56932622fcfb126f6664bcd7d1d88775785c6b15b0842aa8826c916a086f4489",
-   "total": 97,
-   "killed": 97,
+   "sha256": "252961c55b0fa964a464321cc80f3f5d39ee521a45f1b8b678ae3c3ca735fb6b",
+   "total": 112,
+   "killed": 112,
    "ignored": 0,
    "survived": 0
   },
@@ -33,9 +33,9 @@
   {
    "name": "audit",
    "file": "src/audit.mjs",
-   "sha256": "d1e7daf0bcd9b6bcb5599346f9e29d06cda5479926a7f5b783aca4d093213331",
-   "total": 37,
-   "killed": 37,
+   "sha256": "bc599123df5f268a7e384277fc44b2ede9463bf5029a2aec2eca98febbef5e9e",
+   "total": 43,
+   "killed": 43,
    "ignored": 0,
    "survived": 0
   }

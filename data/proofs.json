@@ -3,20 +3,32 @@
   "file": "test/wire.test.mjs",
   "tests": 4,
   "pass": 4,
-  "ran": "2026-11-09",
+  "names": [
+   "one call: reserved, made once through the SDK to the stand-in, settled, priced, and the key never seen",
+   "refusals go in the ledger and nothing goes out: no evidence, today's cap, no key, no size",
+   "an API error is charged the whole ceiling and said; a refusal stop is priced and not ok",
+   "the lock: a live lock refuses, a lock older than ten minutes is cleared; a bad --loopback is refused"
+  ],
+  "ran": "2026-11-10",
   "where": "this repository; CI re-runs it on every push"
  },
  "scan": {
-  "files": 35,
+  "files": 36,
   "hits": 0,
-  "ran": "2026-11-09",
+  "ran": "2026-11-10",
   "where": "every tracked file; CI re-runs it on every push"
  },
  "teacher": {
   "file": "si-didy/patlib-teach.test.mjs",
   "tests": 4,
   "pass": 4,
-  "ran": "2026-11-09",
+  "names": [
+   "the API is asked exactly what the 7B was asked: gather() and promptFor() are identical in both files",
+   "K5: rules that fail the gate are never promoted, whatever the API says",
+   "a rule that passes the gate is promoted with its receipt; the family is then covered, so it is never sent again (C)",
+   "no real night, or a stale one: the teacher asks nothing"
+  ],
+  "ran": "2026-11-10",
   "where": "Kar's machine"
  }
 }

@@ -34,6 +34,8 @@ export function audit(entries, tally) {
   const cap = Math.max(stopNow, W.DEFAULTS.dayCents), t = W.toTally(L, { stopCents: cap, creditCents: cap });
   const a = t.entries.length ? tally(t.cap, t.startSeq, t.entries) : { verdict: 'PASS', violations: [], totalSpent: 0 };
   const tallied = Math.round(a.totalSpent * 100);
+  const sized = s.charges.filter((c) => c.bytes !== null && c.tokensIn !== null);
+  const over = sized.filter((c) => c.tokensIn > c.bytes + W.DEFAULTS.frame).length;
   return {
     calls: s.calls, refused: s.refused, totalCents: s.total,
     rows: [
@@ -41,7 +43,7 @@ export function audit(entries, tally) {
       { id: 'K2', pass: overDays.length === 0 && early === 0, measured: (overDays.length ? 'over the cap on ' + overDays.join(', ') : 'no day over its cap') + ', ' + early + ' settled before reserved' },
       { id: 'K3', pass: s.total <= stopNow && afterOff === 0, measured: usd(s.total) + ' charged, the stop ' + usd(stopNow) + ', ' + afterOff + ' calls after a refusal at the stop' },
       { id: 'K4', pass: s.skipped === 0 && a.verdict === 'PASS' && tallied === s.total, measured: 'kar-tally ' + a.verdict + ', ' + usd(tallied) + ' re-added of ' + usd(s.total) + ', ' + s.skipped + ' unreadable lines' },
-      { id: 'O', pass: s.overruns === 0, measured: s.overruns + ' overruns' },
+      { id: 'O', pass: s.overruns === 0 && over === 0, measured: s.overruns + ' overruns; ' + (sized.length ? over + ' of ' + sized.length + ' answered calls read more input tokens than bytes plus the allowance (the ceiling assumes none do)' : 'no answered call yet to check the one-token-per-byte bound on') },
     ],
   };
 }

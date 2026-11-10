@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Kar Spendwall · an AI agent's paid calls, walled</title>
-<meta name="description" content="A spend wall for an AI agent's paid model calls: the cheaper tiers first, a daily cap checked before every call, the whole worst case reserved before a request goes out, a hard stop that latches, and a ledger an independent auditor re-adds.">
+<title>Kar Spendwall · paid AI calls, capped before they go out</title>
+<meta name="description" content="A spend wall for an AI agent's paid model calls: the cheaper tiers first, the worst case of every call reserved before it goes out, a daily cap, a hard stop that latches, and a numbered ledger that kar-tally re-adds.">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'">
 <style>
 :root{--bg:#f7f5f0;--panel:#ffffff;--ink:#1d1c1a;--muted:#6b665c;--line:rgba(29,28,26,.12);--accent:#3f6b47;--accent-dim:rgba(63,107,71,.10);--win:#2f7a3d;--tie:#a5701c;--bad:#b3452c;--cap:#a5701c;--mono:'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace;--sans:'Inter',-apple-system,system-ui,sans-serif;--serif:'Cormorant Garamond','Iowan Old Style',Georgia,serif}
@@ -34,15 +34,13 @@ p+p{margin-top:8px} ul,ol{padding-left:22px} li{margin:4px 0}
 .chip{display:inline-block;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.06em;padding:2px 10px;border-radius:12px;white-space:nowrap}
 .chip.win{background:color-mix(in srgb,var(--win) 15%,transparent);color:var(--win)} .chip.bad{background:color-mix(in srgb,var(--bad) 15%,transparent);color:var(--bad)} .chip.wait{background:color-mix(in srgb,var(--tie) 15%,transparent);color:var(--tie)}
 button{font:inherit;font-size:15px;color:#fff;background:var(--accent);border:0;border-radius:6px;padding:9px 16px;cursor:pointer}
-button.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
-button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--tie);outline-offset:2px}
+button:focus-visible,input:focus-visible{outline:2px solid var(--tie);outline-offset:2px}
 button:disabled{opacity:.55;cursor:progress}
 table{border-collapse:collapse;width:100%;font-size:14.5px;margin-top:10px}
 td,th{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
 th{font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
 td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
 .tablewrap{overflow-x:auto}
-.ok{color:var(--win);font-weight:600} .no{color:var(--bad);font-weight:600}
 .svgwrap{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:10px}
 .svgwrap svg{display:block;min-width:640px;width:100%;height:auto}
 code{font-family:var(--mono);font-size:.88em;background:var(--accent-dim);padding:1px 5px;border-radius:3px}
@@ -51,12 +49,12 @@ pre{font-family:var(--mono);font-size:12.5px;background:var(--panel);border:1px 
 .controls label{display:flex;gap:6px;align-items:center;font-size:14px;color:var(--muted)}
 .controls input[type=number]{width:96px;font:inherit;font-size:14px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:4px 6px}
 .readout{font-size:15.5px;margin-top:8px;padding:10px 12px;border-left:3px solid var(--accent);background:var(--accent-dim);border-radius:0 6px 6px 0}
-.readout.no{border-left-color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,transparent);font-weight:400;color:var(--ink)}
+.readout.no{border-left-color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,transparent)}
 .steps{counter-reset:s;list-style:none;padding:0}
 .steps>li{counter-increment:s;position:relative;padding:8px 0 8px 40px;border-bottom:1px solid var(--line)}
 .steps>li::before{content:counter(s);position:absolute;left:0;top:8px;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-family:var(--mono);font-size:13px;display:flex;align-items:center;justify-content:center}
 dl.words{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:6px 16px;margin-top:10px}
-dl.words dt{font-weight:600} dl.words dd{color:var(--ink)}
+dl.words dt{font-weight:600}
 footer{max-width:1040px;margin:0 auto;padding:22px 16px 40px;border-top:1px solid var(--line);color:var(--muted);font-size:13.5px}
 footer p+p{margin-top:6px}
 @media (max-width:640px){td,th{padding:6px 5px;font-size:13.5px}dl.words{grid-template-columns:1fr}dl.words dd{margin-bottom:6px}}
@@ -64,52 +62,52 @@ footer p+p{margin-top:6px}
 </head>
 <body>
 <nav class="top" aria-label="Sections">
-  <a href="#result">The result</a><a href="#watch">Watch the wall</a><a href="#try">Try one call</a><a href="#what">What it is</a><a href="#words">Words</a><a href="#start">Start here</a><a href="#how">How it works</a><a href="#blueprint">Blueprint</a><a href="#contract">What it will not do</a><a href="#adoption">Adoption</a><a href="#pilot">A pilot</a><a href="#paper">White paper</a><a href="#business">For business</a>
+  <a href="#result">The result</a><a href="#watch">Watch the wall</a><a href="#try">Try one call</a><a href="#what">What it is</a><a href="#threat">Who it stops</a><a href="#words">Words</a><a href="#start">Start here</a><a href="#how">How it works</a><a href="#blueprint">Blueprint</a><a href="#contract">What it will not do</a><a href="#adoption">Adoption</a><a href="#pilot">A pilot</a><a href="#paper">White paper</a><a href="#business">For business</a>
 </nav>
 <header class="hero">
-  <h1>An AI agent's paid calls, behind a wall it cannot climb.</h1>
-  <p class="lede">Kar, the estate's resident builder, has about a hundred dollars of Claude API credit to spend on its hardest thinking. Everything cheaper goes first. Before a request can go out, this wall reserves the most that call could possibly cost, against a daily cap and a hard stop. Afterwards it settles the call at what it really cost. Every attempt goes in a ledger, and a separate auditor re-adds it.</p>
+  <h1>An AI agent's paid calls, each one costed and capped before it goes out.</h1>
+  <p class="lede">Kar, the resident builder of a large private software estate, has a small amount of Claude API credit to spend on its hardest thinking. This is the wall in front of that credit. A request must show that the cheaper ways were tried and failed. Before it can go out, the wall reserves the most that request could possibly cost, against a daily cap and a hard stop. Afterwards it settles the call at what the API says it cost. Every attempt it handles gets a numbered line in a ledger, and kar-tally, a separate checker from the same estate, re-adds the ledger in order, so a deleted line shows.</p>
   <p class="verdictline" id="verdictline">Loading the record…</p>
 </header>
 <main>
 <section id="result">
   <h2>The result</h2>
-  <p class="muted">Each claim was written down with its bar before any code (<a href="CLAIMS.md">CLAIMS.md</a>). The simulated claims are re-derived byte for byte on every push. A claim that misses its bar is kept and shown as failed. Every number below is read from the committed receipts, never typed in.</p>
-  <div class="tablewrap"><table id="claims"><thead><tr><th>Claim</th><th>What it says</th><th>Measured</th><th>Where it is proven</th><th>Verdict</th></tr></thead><tbody></tbody></table></div>
+  <p class="muted">Each claim was written down with its bar before any code (<a href="CLAIMS.md">CLAIMS.md</a>). A claim that misses its bar is kept and shown as failed. Every number below is read from the committed receipts or computed by your browser while you watch, never typed in. Most claims have two halves: the simulation, which proves the law, and the real ledger on Kar's machine, which proves what happened. The real half is shown separately, and until real calls are made it says so.</p>
+  <div class="tablewrap"><table id="claims"><thead><tr><th>Claim</th><th>What it says</th><th>Measured</th><th>Where</th><th>Verdict</th><th>Real ledger</th></tr></thead><tbody></tbody></table></div>
   <h3>The settings Kar chose</h3>
-  <p class="muted">Simon handed the settings to Kar. Simon can change the daily cap and the stop at any time, in one local file. The law refuses a setting that makes no sense, such as a cap above the stop.</p>
+  <p class="muted">Simon owns the estate and handed these settings to Kar. They live in one local file; the law refuses a setting that makes no sense, such as a cap above the stop.</p>
   <div class="tablewrap"><table id="settings"><tbody></tbody></table></div>
   <h3>The real ledger</h3>
-  <p id="real">The real ledger lives on Kar's own machine, never in this repository. Every morning, Kar's brief runs the same audit on it as the simulation below: every call carried its evidence, no day over its cap, nothing past the stop, kar-tally re-adds it, no call over its ceiling. Until an API key is installed, the tier is off, and the ledger says so with a refusal, not a call.</p>
+  <p id="real">Loading…</p>
 </section>
 
 <section id="watch">
   <h2>Watch the wall hold, sixty days at a time</h2>
-  <p>Below are sixty simulated days. Each day brings far more demand than the cap allows. Some requests come without proof that the cheaper tiers were tried. Some calls die halfway, and some answers come back unreadable. Each request goes through the same law the real wire uses. The bars are what each day spent; the line is the cap. The second chart is the running total climbing to Kar's stop, where the tier switches itself off.</p>
+  <p>Below are sixty simulated days, each with far more demand than the cap allows. Some requests come without proof that the cheaper tiers were tried. Some calls die halfway, and some answers come back unreadable. Every request goes through the same law the real wire uses. The bars are what each day spent; the dashed line is the cap. The second chart is the running total climbing to Kar's stop, where the tier switches itself off.</p>
   <div class="svgwrap"><svg id="daychart" viewBox="0 0 960 260" role="img" aria-label="Spend per simulated day against the daily cap"></svg></div>
   <div class="svgwrap"><svg id="totalchart" viewBox="0 0 960 220" role="img" aria-label="Running total against Kar's stop"></svg></div>
   <div class="cards" id="simcards"></div>
   <h3>Run it yourself</h3>
-  <p class="muted">The same file the receipt came from (<code>src/sim.mjs</code>) runs here in your browser. Leave the settings as they are and your browser re-derives the committed ledger exactly; its fingerprint is checked against the receipt. Change them and the wall holds at your numbers instead.</p>
+  <p class="muted">The same file the receipt came from (<code>src/sim.mjs</code>) runs here in your browser. With the settings as they are, your browser re-derives the committed ledger and checks its fingerprint against the receipt; that is claim R, decided on this page when it loads. Change the settings and the wall holds at your numbers instead.</p>
   <div class="controls">
     <label>daily cap, cents <input id="s-day" type="number" min="1" step="1"></label>
     <label>stop, cents <input id="s-stop" type="number" min="1" step="1"></label>
     <label>days <input id="s-days" type="number" min="1" max="120" step="1"></label>
-    <button id="s-run">Run the sixty days</button>
+    <button id="s-run">Run it</button>
   </div>
   <p id="s-out" class="readout" hidden></p>
 </section>
 
 <section id="try">
   <h2>Try one call</h2>
-  <p>This is the decision the wall makes before every request, run here in your browser by the real law (<code>src/wall.mjs</code>). Say what the cheaper tiers did, how big the request is, and what has been spent. The wall answers with a reservation or a refusal, and says why.</p>
+  <p>This is the decision the wall makes before every request, run in your browser by the real law (<code>src/wall.mjs</code>). Say what the cheaper paths did, how big the request is and what has been spent; the wall answers with a reservation or a refusal, and says why. For Kar, tier 1 is its pattern library and tier 2 is its local model; for your job, they are whatever cheap path it has.</p>
   <div class="controls">
-    <label><input id="t-asked" type="checkbox" checked> the pattern library was asked</label>
+    <label><input id="t-asked" type="checkbox" checked> tier 1 (the cheap tools) was asked</label>
     <label><input id="t-answered" type="checkbox"> and it had an answer</label>
   </div>
   <div class="controls">
-    <label>the 7B's rules tried <input id="t-tried" type="number" min="0" step="1" value="4"></label>
-    <label>of them passed the gate <input id="t-passed" type="number" min="0" step="1" value="0"></label>
+    <label>tier 2 (the local model) attempts <input id="t-tried" type="number" min="0" step="1" value="4"></label>
+    <label>of them that passed <input id="t-passed" type="number" min="0" step="1" value="0"></label>
     <label>request size, bytes <input id="t-bytes" type="number" min="0" step="1" value="4000"></label>
   </div>
   <div class="controls">
@@ -122,40 +120,54 @@ footer p+p{margin-top:6px}
 
 <section id="what">
   <h2>What this is</h2>
-  <p>A small, proven piece of plumbing that sits between an AI agent and a paid model API. The agent uses the paid model only when its free tools and its own local model have genuinely failed. Before any request goes out, the wall works out the worst case that request could cost and reserves it against the day's cap and a hard stop; a request that would not fit is refused, and the work carries on locally. After the answer comes back, the call is priced from what the API reported and the reservation is released down to that. Nothing can spend that was not reserved first.</p>
-  <p>The one job it serves first is Kar's pattern library. Every night a local 7-billion-parameter model on the laptop tries to write rules that sort Kar's repositories into families, and a strict gate keeps only rules that win on data they never saw. When the 7B fails a family completely, that family, and only that family, may go to Claude with the very same question. Claude's rules face the very same gate. A family Claude teaches is covered from then on, so the same question never costs twice.</p>
+  <p>A small piece of plumbing between an AI agent and a paid model API. The agent may use the paid model only when the job reports that its free tools and its own local model failed. Before a request goes out, the wall works out the most it could cost and reserves that against the day's cap and a hard stop; a request that would not fit is refused, with the reason, and nothing is sent. After the answer, the call is priced from the usage the API reported and the reservation comes down to that. Nothing is sent that was not reserved first.</p>
+  <p>Its first job is Kar's pattern library. Every night a local 7-billion-parameter model on the laptop writes rules that sort Kar's repositories into families, and a strict gate keeps only rules that win on data they never saw. When the local model fails a family completely, that family may go to Claude with the very same question, and Claude's rules face the very same gate. Once a rule Claude wrote for a family passes, the library covers that family and it is never sent again.</p>
+</section>
+
+<section id="threat">
+  <h2>Who it stops, and who it does not</h2>
+  <p><b>It stops mistakes and runaway code:</b> a loop that runs all night, a retry storm, a prompt that grows without anyone noticing, a job that reaches for the expensive model when a cheap one would do, a process that dies halfway through a call. Those are the ways spend usually gets away from a team, and the wall answers each one before the money goes.</p>
+  <p><b>It does not stop someone, or something, that can already write to your files.</b> Whoever can read the key file can call the API directly; whoever can edit the settings file can raise the stop; whoever can delete the ledger can start again. That is why the provider's own limit stays on as the outer wall (turn auto-reload off, or set a spend limit in the Console), and why the ledger is numbered and re-added: tampering inside it shows, though deleting the whole file does not.</p>
 </section>
 
 <section id="words">
   <h2>Words on this page</h2>
   <dl class="words">
+    <dt>Kar</dt><dd>The resident AI builder of Simon's software estate: it builds, tests and ships on Simon's own laptop, and uses this wall for the small part of its thinking that needs a large paid model.</dd>
+    <dt>The estate</dt><dd>Simon's collection of software projects, which share their proven parts (here, the-wallet and kar-tally).</dd>
     <dt>API</dt><dd>The paid service a program calls to use a large model, here Anthropic's Claude. It bills by the token.</dd>
-    <dt>Token</dt><dd>The unit a model reads and writes, a few letters long. A token is never shorter than one byte, which is what lets the wall bound a request's cost before it is sent.</dd>
-    <dt>Tier 1, 2, 3</dt><dd>The order of who does the work: tier 1 is free deterministic tools and the pattern library; tier 2 is the local 7B; tier 3 is the paid API. The last word, on anything public, paid or risky, is Simon's.</dd>
-    <dt>The 7B</dt><dd>A 7-billion-parameter model (qwen2.5:7b) that runs on the laptop itself, for free.</dd>
-    <dt>Pattern library</dt><dd>Kar's growing set of small, proven rules (WHEN a word THEN a family), each kept only after winning on held-out data.</dd>
-    <dt>The gate</dt><dd>The deterministic test every rule must pass to enter the library, whoever wrote it.</dd>
-    <dt>Ceiling</dt><dd>The most one call could cost: every byte of the request priced as a token at the dearer input price, plus a framing allowance, plus every output token the limit allows. Rounded up to a whole cent.</dd>
+    <dt>Token</dt><dd>The unit a model reads and writes, a few letters long. The wall assumes a request has no more tokens than bytes, plus a framing allowance, and checks that on every real answer.</dd>
+    <dt>Tier 1, 2, 3</dt><dd>Who does the work, cheapest first: tier 1 is free deterministic tools; tier 2 is a local model; tier 3 is the paid API. Anything public, paid or risky is Simon's to decide.</dd>
+    <dt>Families</dt><dd>The groups Kar sorts its repositories into, and the pattern library's rules each name one.</dd>
+    <dt>The gate</dt><dd>The deterministic test every rule must pass to enter the pattern library, whoever wrote it.</dd>
+    <dt>Ceiling</dt><dd>The most one call could cost: every byte of the request priced as a token at the dearer input price, plus a framing allowance, plus every output token the limit allows, rounded up to a whole cent.</dd>
     <dt>Reservation</dt><dd>The ledger line written, and flushed to disk, before a request goes out. It charges the whole ceiling.</dd>
-    <dt>Settle</dt><dd>The ledger line written after the answer: the call priced from the usage the API reported, rounded up to the cent. An unreadable answer is charged the whole ceiling.</dd>
-    <dt>Daily cap</dt><dd>The most the tier may spend in one UTC day.</dd>
-    <dt>The stop</dt><dd>The total Kar will not pass, set a little under the credit so a call never meets an empty balance mid-flight. Once a call is refused there, the tier stays off until Simon raises the stop.</dd>
-    <dt>UTC day</dt><dd>A day by the world clock, midnight to midnight, not by the laptop's time zone.</dd>
-    <dt>Ledger</dt><dd>The append-only file of every attempt: reservations, settlements and refusals, each with its reason.</dd>
-    <dt>kar-tally</dt><dd>A separate auditor from the same estate. It re-adds a spend log from scratch and checks that the running balance never went below zero. It is used here unmodified.</dd>
-    <dt>Mutation gate</dt><dd>witness: it changes the code one operator at a time and checks the tests catch every change. "Clean" means every change was caught.</dd>
+    <dt>Settle</dt><dd>The ledger line written after the answer: the call priced from the reported usage, rounded up to the cent. A failed or unreadable answer is charged the whole ceiling.</dd>
+    <dt>Daily cap</dt><dd>The most the ledger may be charged in one UTC day (midnight to midnight by the world clock).</dd>
+    <dt>The stop</dt><dd>The total the ledger will not pass, set a little under the credit so a call never meets an empty balance mid-flight. Once a call is refused there, the tier stays off until the stop is raised in the settings file.</dd>
+    <dt>Ledger</dt><dd>The append-only file of every attempt the wire handles, each with its own number: reservations, settlements and refusals, each with its reason.</dd>
+    <dt>Morning line</dt><dd>The one line Kar shows Simon at the start of every session: spent today, spent in total, what is left, by job.</dd>
+    <dt>the-wallet</dt><dd>The estate's proven budget check: it refuses any spend that would pass a total. The wall uses it twice, for the cap and for the stop.</dd>
+    <dt>kar-tally</dt><dd>A separate checker from the same estate: it re-adds a numbered spend log from the first line, checks the numbering has no gaps and the balance never went below zero. It is used unmodified.</dd>
+    <dt>Mutation gate</dt><dd>witness: it changes the code one operator at a time and checks the tests catch every change. "Clean" means every change it made was caught.</dd>
   </dl>
 </section>
 
 <section id="start">
   <h2>Start here</h2>
   <ol class="steps">
-    <li><b>Get the code.</b> Clone the repository and run <code>npm ci</code>. There is one dependency, Anthropic's official SDK, pinned to an exact version.</li>
-    <li><b>Put the key in a file, not in the environment.</b> Save the API key alone in <code>~/.si-didy/keys/anthropic-api.key</code>, outside every repository. The wire reads it from there and nowhere else, and removes every <code>ANTHROPIC_*</code> variable from its own process.</li>
-    <li><b>Turn auto-reload off in the Anthropic Console.</b> Then the credit itself is a hard stop that no bug in any code can pass. The wall's stop sits just under it.</li>
-    <li><b>Set your numbers, if you want different ones.</b> Write <code>{"dayCents": 300, "stopCents": 9500}</code> to <code>~/.si-didy/api/settings.json</code>. Leave the file out for Kar's defaults.</li>
-    <li><b>Send a request.</b> Pipe one JSON line to <code>node tools/ask.mjs</code>: the job, the evidence that the cheaper tiers failed, and the prompt. You get one JSON line back: the answer or the refusal, the cost, and the morning line.</li>
-    <li><b>Read the ledger.</b> <code>node tools/audit.mjs</code> judges the real ledger by the claims' own bars and has kar-tally re-add it.</li>
+    <li><b>Get the code.</b> Clone the repository and run <code>npm ci</code> with Node 22 (the version CI tests). There is one dependency, Anthropic's official SDK, pinned to an exact version.</li>
+    <li><b>Put the key in a file, not in the environment.</b> Save the API key alone in <code>~/.si-didy/keys/anthropic-api.key</code>, outside every repository, readable only by you. For real calls the wire reads the key from there and the ledger from <code>~/.si-didy/api/</code>; no environment variable can move either, and every <code>ANTHROPIC_*</code> variable is removed from its process.</li>
+    <li><b>Keep the provider's own limit on.</b> Turn auto-reload off in the Anthropic Console, or set a spend limit. That outer wall holds even if this machine is compromised.</li>
+    <li><b>Set your numbers, if you want different ones.</b> Write them to <code>~/.si-didy/api/settings.json</code>, in cents, for example <code>{"dayCents": 300, "stopCents": 9500}</code>. A stop above the default credit needs the credit too: <code>{"stopCents": 19000, "creditCents": 20000}</code>.</li>
+    <li><b>Send a request.</b> Pipe one JSON line to <code>node tools/ask.mjs</code>, and read one JSON line back:
+<pre>in:  {"job": "teacher", "prompt": "...", "system": "(optional)",
+      "evidence": {"tier1": {"asked": true, "answered": false},
+                   "tier2": {"tried": 3, "passed": 0}}}
+out: {"ok": true, "code": "end_turn", "text": "...", "seq": 12,
+      "costCents": 3, "ceilingCents": 14, "brief": "the morning line"}
+     or {"ok": false, "code": "day", "why": "API budget reached for today ...", ...}</pre></li>
+    <li><b>Read the ledger.</b> <code>node tools/audit.mjs</code> judges the real ledger by the claims' own bars and has kar-tally re-add it; <code>--write</code> saves the result as the receipt this page shows.</li>
   </ol>
 </section>
 
@@ -164,62 +176,63 @@ footer p+p{margin-top:6px}
   <div class="svgwrap"><svg viewBox="0 0 960 300" role="img" aria-label="The path of one request: the cheaper tiers, the law's check, the reservation, the one request, the settlement">
     <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker></defs>
     <g font-family="var(--sans)" font-size="13" fill="var(--ink)">
-      <rect x="10" y="20" width="170" height="64" rx="8" fill="var(--panel)" stroke="var(--line)"/><text x="22" y="44" font-weight="600">Tier 1</text><text x="22" y="64" fill="var(--muted)">tools + pattern library</text>
-      <rect x="10" y="118" width="170" height="64" rx="8" fill="var(--panel)" stroke="var(--line)"/><text x="22" y="142" font-weight="600">Tier 2</text><text x="22" y="162" fill="var(--muted)">the local 7B</text>
+      <rect x="10" y="20" width="170" height="64" rx="8" fill="var(--panel)" stroke="var(--line)"/><text x="22" y="44" font-weight="600">Tier 1</text><text x="22" y="64" fill="var(--muted)">free tools, the library</text>
+      <rect x="10" y="118" width="170" height="64" rx="8" fill="var(--panel)" stroke="var(--line)"/><text x="22" y="142" font-weight="600">Tier 2</text><text x="22" y="162" fill="var(--muted)">the local model</text>
       <text x="22" y="230" fill="var(--muted)">answered or passed?</text><text x="22" y="248" fill="var(--muted)">then done, for free</text>
       <line x1="180" y1="52" x2="226" y2="130" stroke="var(--muted)" marker-end="url(#ar)"/><line x1="180" y1="150" x2="226" y2="150" stroke="var(--muted)" marker-end="url(#ar)"/>
       <rect x="230" y="104" width="170" height="92" rx="8" fill="var(--accent-dim)" stroke="var(--accent)"/><text x="242" y="128" font-weight="600">The law decides</text><text x="242" y="148" fill="var(--muted)">evidence · price · size</text><text x="242" y="166" fill="var(--muted)">stop · today's cap</text><text x="242" y="184" fill="var(--muted)">(src/wall.mjs)</text>
-      <line x1="315" y1="196" x2="315" y2="236" stroke="var(--bad)" marker-end="url(#ar)"/><text x="248" y="256" fill="var(--bad)">refused: logged, work goes on locally</text>
+      <line x1="315" y1="196" x2="315" y2="236" stroke="var(--bad)" marker-end="url(#ar)"/><text x="248" y="256" fill="var(--bad)">refused: logged, nothing sent</text>
       <line x1="400" y1="150" x2="446" y2="150" stroke="var(--muted)" marker-end="url(#ar)"/>
       <rect x="450" y="104" width="150" height="92" rx="8" fill="var(--panel)" stroke="var(--line)"/><text x="462" y="128" font-weight="600">Reserve</text><text x="462" y="148" fill="var(--muted)">the whole ceiling,</text><text x="462" y="166" fill="var(--muted)">on disk first</text>
       <line x1="600" y1="150" x2="646" y2="150" stroke="var(--muted)" marker-end="url(#ar)"/>
       <rect x="650" y="104" width="140" height="92" rx="8" fill="var(--panel)" stroke="var(--line)"/><text x="662" y="128" font-weight="600">One request</text><text x="662" y="148" fill="var(--muted)">no retry, the key</text><text x="662" y="166" fill="var(--muted)">read only here</text>
       <line x1="790" y1="150" x2="836" y2="150" stroke="var(--muted)" marker-end="url(#ar)"/>
       <rect x="840" y="104" width="110" height="92" rx="8" fill="var(--panel)" stroke="var(--line)"/><text x="852" y="128" font-weight="600">Settle</text><text x="852" y="148" fill="var(--muted)">priced from</text><text x="852" y="166" fill="var(--muted)">real usage</text>
-      <line x1="895" y1="196" x2="895" y2="236" stroke="var(--muted)" marker-end="url(#ar)"/><text x="740" y="256" fill="var(--muted)">the gate judges the answer</text><text x="740" y="274" fill="var(--muted)">the ledger, the morning line</text>
+      <line x1="895" y1="196" x2="895" y2="236" stroke="var(--muted)" marker-end="url(#ar)"/><text x="720" y="256" fill="var(--muted)">the answer goes back as text;</text><text x="720" y="274" fill="var(--muted)">the job's own gate judges it</text>
     </g>
   </svg></div>
   <h3>One call, traced</h3>
-  <p class="muted">This is the wire's own test, with no money spent. <code>tools/ask.mjs</code> sends a real request through Anthropic's SDK to a stand-in for the API on this machine. Decoy credentials and a decoy endpoint sit in its environment; the test proves neither was used. The stand-in reports its usage, and the law prices it. Your browser re-computes every number below from the same law.</p>
+  <p class="muted">This is the wire's own test, and no money is spent. <code>tools/ask.mjs</code> sends a real request through Anthropic's SDK to a stand-in for the API on this machine. Decoy credentials and a decoy address sit in its environment, and the test proves neither was used. The stand-in reports its usage and the law prices it; your browser re-computes every number below from the same law.</p>
   <ol id="trace"></ol>
 </section>
 
 <section id="blueprint">
   <h2>Blueprint</h2>
   <div class="tablewrap"><table>
-    <thead><tr><th>Organ</th><th>What it does</th><th>Proven by</th></tr></thead>
-    <tr><td><code>src/wall.mjs</code></td><td>The law: settings, prices, the ceiling, replaying the ledger, the check, the tier order, the reservation, the settlement, the morning line, the auditor's form. No clock, no disk, no network.</td><td>Hand-worked tests, a fuzz, the mutation gate</td></tr>
-    <tr><td><code>src/teach.mjs</code></td><td>The one job's law: which of the library's families may go to the API tonight, with the evidence for each.</td><td>Tests, the mutation gate</td></tr>
+    <thead><tr><th>Part</th><th>What it does</th><th>Proven by</th></tr></thead>
+    <tr><td><code>src/wall.mjs</code></td><td>The law: settings, prices, the ceiling, replaying the numbered ledger, the check, the tier order, the reservation, the settlement, the morning line, kar-tally's input. No clock, no disk, no network.</td><td>Hand-worked tests, a fuzz, the mutation gate</td></tr>
+    <tr><td><code>src/teach.mjs</code></td><td>The first job's law: which families of the pattern library may go to the API tonight, with the evidence for each.</td><td>Tests, the mutation gate</td></tr>
     <tr><td><code>src/sim.mjs</code></td><td>Sixty days of hostile demand through the law, and the measurements read back from the ledger alone.</td><td>Pinned output, every verdict shown able to fail, the mutation gate</td></tr>
-    <tr><td><code>src/audit.mjs</code></td><td>The real ledger judged by the claims' own bars, fair to a cap or stop Simon raised later.</td><td>Every violation built by hand and caught, the mutation gate</td></tr>
-    <tr><td><code>tools/ask.mjs</code></td><td>The wire: the lock, the plan, the reservation flushed to disk, one request through the official SDK, the settlement. The only file that touches the key.</td><td>End-to-end against a stand-in API, with decoy credentials</td></tr>
-    <tr><td><code>vendor/wallet</code></td><td>the-wallet's <code>canDo</code>, the estate's proven budget check, used for both the cap and the stop.</td><td>Pinned by SHA-256</td></tr>
-    <tr><td><code>vendor/kar-tally</code></td><td>The independent auditor, unmodified.</td><td>Pinned by SHA-256</td></tr>
-    <tr><td><code>si-didy/patlib-teach.mjs</code></td><td>On Kar's machine: the teacher step after each night of the pattern library. The library's own gate decides; the night itself stays free of any paid call.</td><td>End to end with a stand-in wire, on Kar's machine</td></tr>
+    <tr><td><code>src/audit.mjs</code></td><td>The real ledger judged by the claims' own bars, fair to a cap or stop raised later, and the token bound checked on every answer.</td><td>Every violation built by hand and caught, the mutation gate</td></tr>
+    <tr><td><code>tools/ask.mjs</code></td><td>The wire: the lock, the plan, the reservation flushed to disk, one request through the official SDK, the settlement. The only file that touches the key.</td><td>End to end against a stand-in API with decoy credentials (not mutation-tested)</td></tr>
+    <tr><td><code>vendor/wallet</code></td><td>the-wallet's budget check, used for both the cap and the stop.</td><td>Pinned by SHA-256</td></tr>
+    <tr><td><code>vendor/kar-tally</code></td><td>The ledger checker, unmodified.</td><td>Pinned by SHA-256</td></tr>
+    <tr><td><code>si-didy/patlib-teach.mjs</code></td><td>On Kar's machine: the teacher step after each night of the pattern library. The library's own gate decides; the night itself still makes no paid call.</td><td>End to end with a stand-in wire, on Kar's machine only</td></tr>
   </table></div>
 </section>
 
 <section id="contract">
   <h2>What it will not do</h2>
   <ul>
-    <li>It will not call the API for a job the free tiers could do, or without the evidence that they failed.</li>
+    <li>It will not send a request whose evidence does not say the cheaper tiers were tried and failed. It trusts what the job reports, and keeps that evidence in the ledger for anyone to check.</li>
     <li>It will not send a request before its whole worst case is reserved on disk.</li>
     <li>It will not retry: a retry would be a second spend under one reservation.</li>
-    <li>It will not guess a price. A model with no published flat price is refused.</li>
-    <li>It will not read a credential or an endpoint from its environment, or send the key anywhere but Anthropic's API.</li>
-    <li>It will not let an answer act on its own: an answer is a proposal until the job's own gate passes it.</li>
-    <li>It will not pass the stop, or switch itself back on. Only Simon raising the stop does that.</li>
+    <li>It will not guess a price. A model with no flat published price is refused.</li>
+    <li>It will not take a credential or an address from its environment for a real call. The real key goes only to Anthropic's API; the test mode refuses to read it.</li>
+    <li>It will not act on an answer. It returns text; the job's own gate decides what it is worth.</li>
+    <li>It will not pass the stop, or switch itself back on: that takes raising the stop in the settings file.</li>
+    <li>It does one prompt in, text out. No tools, images, streaming or conversations: the first job needs none of them.</li>
   </ul>
 </section>
 
 <section id="adoption">
   <h2>Adoption</h2>
-  <p>Any team that lets software call a paid model has the same exposure: a loop that runs all night, a retry storm, a prompt that grows without anyone noticing. Provider dashboards and monthly limits tell you afterwards, for the whole organisation at once. This wall decides before each call, for each job, and writes down why.</p>
+  <p>Any team that lets software call a paid model has the same exposure. Dashboards tell you afterwards. The provider's limits are enforced, but per organisation or workspace and by the month. This wall decides before each call, per ledger and per UTC day, and writes down why.</p>
   <ul>
-    <li><b>Put it in front of one job first.</b> One script, one ledger, one cap. Watch the morning line for a week.</li>
-    <li><b>Write the evidence your cheaper tiers produce.</b> The tier order is only as honest as the evidence passed in; make the job record what the cheap path tried.</li>
-    <li><b>Keep the provider's own limit as the outer wall.</b> Auto-reload off, or a spend limit in the Console. Two walls, one of them outside your code.</li>
-    <li><b>Audit the real ledger.</b> Run <code>tools/audit.mjs</code> daily, and compare its total with the provider's usage page now and then: the auditor proves the ledger adds up, and the usage page proves the ledger is complete.</li>
+    <li><b>Put it in front of one job first.</b> One ledger, one cap; the morning line reports spend by job. Watch it for a week.</li>
+    <li><b>Write the evidence your cheaper path produces.</b> The tier order is only as honest as the evidence passed in; build it from your job's own records, not from anything a model says.</li>
+    <li><b>Keep the provider's own limit as the outer wall.</b> Two walls, one of them outside your machine.</li>
+    <li><b>Audit the real ledger.</b> Run <code>tools/audit.mjs</code> daily and compare its total with the provider's usage page now and then: the checker proves the ledger adds up and has no gaps; the usage page proves nothing was spent outside it.</li>
   </ul>
 </section>
 
@@ -227,76 +240,78 @@ footer p+p{margin-top:6px}
   <h2>A pilot, step by step</h2>
   <ol class="steps">
     <li><b>Pick the job.</b> One automated job that calls a paid model today.</li>
-    <li><b>Set the cap from the bill you can live with.</b> The page's calculator below shows the runway it gives you.</li>
+    <li><b>Set the cap from the bill you can live with.</b> The calculator below shows what a runaway loop would cost with the wall and without it.</li>
     <li><b>Wire the job through <code>tools/ask.mjs</code>.</b> Pass the evidence of what the cheap path tried.</li>
     <li><b>Run for two weeks.</b> Read the morning line daily; run the audit.</li>
-    <li><b>Compare with the provider's usage page.</b> The wall's total should sit at, or a little above, the provider's: it rounds every call up to the next cent.</li>
+    <li><b>Compare with the provider's usage page.</b> The wall's total should be at or above the provider's: it rounds every call up to the cent, and charges a failed call its whole ceiling.</li>
     <li><b>Decide.</b> Keep it, widen it to a second job, or take it out. Nothing else changes.</li>
   </ol>
 </section>
 
 <section id="paper">
   <h2>White paper: reserve before you spend</h2>
-  <p><b>The problem.</b> A spend control that looks only at what has been spent so far, and refuses once a limit is crossed, is too late by one call, and a model call can be expensive: the output alone can run to tens of thousands of tokens, thinking included. A loop that checks the balance and then makes a large call can overshoot by the size of that call, every time.</p>
-  <p><b>The idea.</b> Bound the call before it exists. A request's input cannot be more tokens than it has bytes, and its output cannot exceed the limit you set. So the most it can cost is known in advance. Reserve that whole amount against the cap, on disk, before the request goes out. When the answer comes back, settle it at what it really cost and release the rest. If the process dies mid-call, the reservation stands, so the ledger never under-counts.</p>
-  <p><b>The order.</b> A paid call is the last resort, not the default. The request must carry evidence that the free tools and the local model were tried and failed. The wall refuses it otherwise.</p>
-  <p><b>The stop.</b> A hard stop a little under the credit, so a call never meets an empty balance mid-flight. When a call is refused there, the tier latches off. It does not drift back on as small calls fit again; a person turns it back on.</p>
-  <p><b>The proof.</b> Every decision lives in one pure file that the mutation gate proves: every change to it is caught by a test. Sixty days of hostile demand run through that same file and are re-derived on every push. An auditor from outside the build re-adds the ledger. The live wire is tested end to end against a stand-in API with decoy credentials in its environment. The real ledger is audited every morning by the same rules.</p>
-  <p><b>The honest limits.</b> The auditor proves the ledger adds up, not that it is complete: compare it with the provider's usage page. Prices are read from the provider's page by hand, with the date; if they change, the table must be updated. A token is never shorter than a byte, but the framing allowance is still an allowance: the record counts overruns, the morning brief checks the real ledger for them every day, and so far there have been none.</p>
+  <p><b>The problem.</b> A spend control that looks only at what has been spent so far, and refuses once a limit is crossed, is too late by one call, and a model call can be expensive: the output alone can run to tens of thousands of tokens, thinking included. A loop that checks the balance and then makes a large call can overshoot by the size of that call, every day.</p>
+  <p><b>The idea.</b> Bound the call before it exists. Take its input as no more tokens than it has bytes, plus an allowance, and its output as the full limit you set; that is the most it can cost. Reserve that whole amount against the cap, on disk, before the request goes out. When the answer comes back, settle it at what it really cost. If the process dies mid-call, the reservation stands, so the ledger never under-counts. A single call too big for any whole day is refused on its own, without touching the stop.</p>
+  <p><b>The order.</b> A paid call is the last resort. The request must carry evidence that the free tools and the local model were tried and failed, and the wall refuses it otherwise.</p>
+  <p><b>The stop.</b> A hard stop a little under the credit, so a call never meets an empty balance mid-flight. When a call is refused there, the tier latches off: it does not drift back on as small calls fit again.</p>
+  <p><b>The proof.</b> Every decision lives in one pure file, and the mutation gate caught every change it made to it. Sixty days of hostile demand run through that same file and are re-derived on every push. kar-tally re-adds the numbered ledger. The wire is tested end to end against a stand-in API with decoy credentials in its environment. The real ledger is judged every morning by the same rules.</p>
+  <p><b>The honest limits.</b> kar-tally proves the ledger adds up and has no gaps, not that it is complete: deleting its last lines, or the whole file, does not show, so compare it with the provider's usage page. The one-token-per-byte bound is an assumption about Anthropic's tokenizer; the audit checks it on every real answer, and the simulation, which never breaks it by design, cannot test it. Prices are read from the provider's page by hand, with the date; if they change, the table must be updated.</p>
 </section>
 
 <section id="business">
   <h2>For business</h2>
   <div class="tablewrap"><table>
     <thead><tr><th>Who</th><th>What this means for them</th></tr></thead>
-    <tr><td>Chief executive</td><td>AI that is allowed to spend, with a ceiling that holds. The board hears a limit the code checks before every call, not a promise someone has to remember.</td></tr>
-    <tr><td>Finance</td><td>A daily cap and a hard stop decided before each call, and a ledger an independent auditor re-adds. A runaway loop costs at most one day's cap for each day it runs, not a month's surprise.</td></tr>
-    <tr><td>Operations</td><td>When the cap is reached the work does not stop: it falls back to the free tiers, and the paid tier is back the next day.</td></tr>
-    <tr><td>Technology and security</td><td>One small file of law, mutation-proven. The key lives in one file, is read by one process, and goes to one address. Credentials in the environment are ignored on purpose.</td></tr>
-    <tr><td>The teams</td><td>One command to call, one line back, one morning line to read. Refusals say why in plain words.</td></tr>
+    <tr><td>Chief executive</td><td>AI that is allowed to spend, under a limit the code checks before every call rather than a policy someone has to remember.</td></tr>
+    <tr><td>Finance</td><td>A daily cap and a hard stop decided before each call, and a numbered ledger a separate checker re-adds. A runaway loop costs at most one day's cap for each UTC day it runs.</td></tr>
+    <tr><td>Operations</td><td>A refusal says why in plain words. What the job does instead is up to the job; the cap resets the next UTC day, and a latched stop waits for someone to raise it.</td></tr>
+    <tr><td>Technology and security</td><td>One small file of law, mutation-proven, and one wire that alone reads the key and sends it only to Anthropic's API. It stops mistakes and runaway code, not someone who can already write to the machine: the provider's limit is the outer wall.</td></tr>
+    <tr><td>The teams</td><td>One command, one line back, one morning line to read.</td></tr>
   </table></div>
   <h3>The cost case: a runaway loop, with the wall and without</h3>
-  <p class="muted">Your numbers in. The price per call is worked out by the law from the published price table and the output limit you set. These are your costs. No price of ours appears.</p>
+  <p class="muted">Your numbers in. The worst case of each call is worked out by the law from the published price table for the model shown, and the output limit you set. These are your costs; no price of ours appears.</p>
   <div class="controls">
-    <label>calls a minute in the loop <input id="c-rate" type="number" min="0" step="1" value="6"></label>
+    <label>calls a minute <input id="c-rate" type="number" min="0" step="1" value="6"></label>
     <label>hours before anyone notices <input id="c-hours" type="number" min="0" step="1" value="14"></label>
     <label>output limit, tokens <input id="c-out" type="number" min="1" max="128000" step="1" value="6000"></label>
     <label>request size, bytes <input id="c-bytes" type="number" min="0" step="1" value="4000"></label>
     <label>daily cap, cents <input id="c-cap" type="number" min="1" step="1" value="250"></label>
+    <label>stop, cents <input id="c-stop" type="number" min="1" step="1" value="9500"></label>
   </div>
   <p id="c-head" style="font-size:17px">…</p>
   <div class="tablewrap"><table id="c-table"><thead><tr><th>Route</th><th>What happens</th><th>The bill</th></tr></thead><tbody></tbody></table></div>
   <h3>Against what you have now</h3>
   <div class="tablewrap"><table>
     <thead><tr><th>What you have now</th><th>What it does</th><th>What this adds</th></tr></thead>
-    <tr><td>The provider's monthly limit or prepaid credit</td><td>A real outer wall, for a whole organisation or workspace, by the month.</td><td>A wall per job, per day, decided before each call, with the reason written down.</td></tr>
+    <tr><td>The provider's spend limit or prepaid credit</td><td>A real outer wall, per organisation or workspace, by the month.</td><td>A wall per ledger, per UTC day, decided before each call, with the reason written down.</td></tr>
     <tr><td>Usage dashboards and alerts</td><td>Tell you after the money is spent.</td><td>Refuses before the money is spent.</td></tr>
     <tr><td>Rate limits</td><td>Bound requests and tokens per minute, not dollars per day.</td><td>Bounds dollars per day and in total, counting each call at its worst case before it goes out.</td></tr>
   </table></div>
   <h3>Security, compliance and data</h3>
   <ul>
-    <li>The key is read from one file outside every repository, by one process, sent to one address, and never written to the ledger, the console or the page. A test proves it with a fake key and decoy credentials; CI scans every tracked file for anything shaped like a key.</li>
-    <li>The ledger holds job names, sizes, token counts and costs. It holds no prompt and no answer.</li>
-    <li>The page loads only its own files. It sends nothing anywhere.</li>
+    <li>For a real call the key is read from one fixed file by one process and sent only to Anthropic's API; it is never written to the ledger, the console or the page. A test proves it with a fake key and decoy credentials; CI scans every tracked file for anything shaped like a key.</li>
+    <li>The ledger holds job names, sizes, token counts, costs, the evidence in its fixed shape, and the API's error text when a call fails. It holds no prompt and no answer.</li>
+    <li>The page loads only its own files and sends nothing anywhere.</li>
   </ul>
   <h3>Deployment, support and ownership</h3>
-  <p>It is a folder of plain JavaScript and one pinned dependency, run with Node 20 or later, on your machine. You own it: the code is MIT. Supplied by <a href="https://www.ai-nativesolutions.com" rel="noopener">AI Native Solutions</a>; contact through that site. Support, SLA, warranty and liability are agreed per deployment.</p>
+  <p>It is a folder of plain JavaScript and one pinned dependency, run with Node 22 on your machine. You own it: the code is MIT. Supplied by <a href="https://www.ai-nativesolutions.com" rel="noopener">AI Native Solutions</a>; contact through that site. Support, SLA, warranty and liability are agreed per deployment.</p>
   <h3>Risks, answered straight</h3>
   <div class="tablewrap"><table>
-    <tr><td><b>What if the price changes?</b></td><td>The price table names its source and the date it was read. Update it the day prices change; until then, the wall prices by the old table. Rounding every charge up gives a little slack, not a guarantee.</td></tr>
+    <tr><td><b>Can the agent go around the wall?</b></td><td>An agent that can run commands as you can read the key file or edit the settings. The wall stops mistakes and runaway code, not that; the provider's own limit is the wall it cannot touch.</td></tr>
+    <tr><td><b>What if the price changes?</b></td><td>The price table names its source and the date it was read. Update it the day prices change. Rounding every charge up gives a little slack, not a guarantee.</td></tr>
     <tr><td><b>What if a call costs more than its ceiling?</b></td><td>It is still charged in full and flagged as an overrun in the ledger and the morning line. <span id="faq-overrun">Loading…</span></td></tr>
-    <tr><td><b>What if the process dies mid-call?</b></td><td>The reservation is already on disk, so the call counts at its whole ceiling. A lock left behind clears itself after ten minutes.</td></tr>
-    <tr><td><b>Can the agent forge the evidence?</b></td><td>The wall trusts the evidence the job writes. That is why the evidence is kept in the ledger with every call, for anyone to check, and why the teacher job builds it from the night's own records rather than from anything the model says.</td></tr>
+    <tr><td><b>What if the process dies mid-call?</b></td><td>The reservation is already on disk, so the call counts at its whole ceiling. A lock left behind clears itself after ten minutes. A second call that finds the lock held is turned away before it reaches the ledger.</td></tr>
+    <tr><td><b>Can the job lie about the evidence?</b></td><td>Yes: the wall trusts what the job reports. The evidence is kept in the ledger with every call, for anyone to check, and Kar's teacher builds it from the night's own records, never from anything a model says.</td></tr>
     <tr><td><b>What failed?</b></td><td id="faq-failed">Loading…</td></tr>
-    <tr><td><b>Who uses it?</b></td><td>Kar, on its own credit, first. No outside team yet: this is the showcase.</td></tr>
+    <tr><td><b>Who uses it?</b></td><td><span id="faq-who">Loading…</span></td></tr>
   </table></div>
   <h3>The case for the board</h3>
-  <p>Letting AI spend money is coming either way. The question is whether the limit is a policy someone has to remember or a wall in the code that is tested every time it changes. This is a wall: small enough to read, proven by tests that catch every change to it, and audited by something outside itself.</p>
+  <p>Letting AI spend money is coming either way. The question is whether the limit is a policy someone has to remember or a check in the code, small enough to read, with every change to it caught by a test, and a ledger that a separate checker re-adds. Keep the provider's limit on as well; this does not replace it, it decides earlier.</p>
 </section>
 </main>
 <footer>
-  <p>Prices: Anthropic's published API prices, read on the pricing page on the date in <a href="data/prices.json">the table</a>. Claude and Anthropic are names of Anthropic; this page is not theirs.</p>
-  <p>Built on the estate's own organs: the-wallet's budget check and kar-tally, the auditor, both vendored unmodified and pinned.</p>
+  <p>Prices: Anthropic's published API prices, read on its pricing page on the date in <a href="data/prices.json">the table</a>. Claude and Anthropic are names of Anthropic; this page is not theirs.</p>
+  <p>Built on two parts of the estate, the-wallet's budget check and kar-tally, both used unmodified and pinned.</p>
   <p>Powered by the Konomi architecture, created by Thomas Frumkin.</p>
   <p>MIT licence for the code · <a href="https://github.com/sjgant80-hub/kar-spendwall">source</a> · kar-spendwall.</p>
 </footer>

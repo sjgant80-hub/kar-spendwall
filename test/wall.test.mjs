@@ -159,8 +159,9 @@ test('replay: a call counts at its ceiling until it is settled, then at what it 
   assert.equal(s.overruns, 0);
   assert.deepEqual(s.open, [2, 8]);
   assert.equal(s.offAt, null);
-  assert.deepEqual(s.charges, [{ seq: 1, job: 'teacher', day: '2026-11-09', cents: 3 }, { seq: 2, job: 'teacher', day: '2026-11-09', cents: 14 },
-    { seq: 7, job: '?', day: '2026-11-09', cents: 10 }, { seq: 8, job: '?', day: '2026-11-09', cents: 10 }]);
+  assert.deepEqual(s.charges, [{ seq: 1, job: 'teacher', day: '2026-11-09', cents: 3, bytes: null, tokensIn: null }, { seq: 2, job: 'teacher', day: '2026-11-09', cents: 14, bytes: null, tokensIn: null },
+    { seq: 7, job: '?', day: '2026-11-09', cents: 10, bytes: null, tokensIn: null }, { seq: 8, job: '?', day: '2026-11-09', cents: 10, bytes: null, tokensIn: null }]);
+  assert.deepEqual(s.rows.map((r) => [r.seq, r.kind, r.code, r.cents]), [[1, 'call', 'settled', 3], [2, 'call', 'unsettled', 14], [3, 'refused', 'day', 0], [7, 'call', 'settled', 10], [8, 'call', 'unsettled', 10]]);
   assert.equal(replay([res(1, 14), set(1, 15)]).overruns, 1);
   assert.equal(replay([res(1, 14), set(1, 15)]).total, 15);
   assert.equal(replay([res(1, 14), set(1, 14)]).overruns, 0);
@@ -172,6 +173,19 @@ test('replay: a call counts at its ceiling until it is settled, then at what it 
   assert.equal(replay([res(1, 14), { seq: 99.5 }]).last, 1);
   assert.equal(replay([res(1, 14), { seq: 'z' }]).last, 1);
   assert.equal(plan([res(1, 14), { seq: 99.5, kind: 'refuse' }], { job: 'teacher', evidence: GOOD, bytes: 10 }, {}, PRICES, AT, true).entry.seq, 2);
+});
+
+test('replay: one line owns each seq; a second claim on a taken seq is skipped, whatever its kind', () => {
+  const r = { seq: 2, kind: 'refuse', code: 'day', stopCents: 9500 };
+  assert.equal(replay([r, { ...r }]).refused, 1);
+  assert.equal(replay([r, { ...r }]).skipped, 1);
+  assert.equal(replay([res(2, 14), r]).refused, 0);
+  assert.equal(replay([res(2, 14), r]).skipped, 1);
+  assert.equal(replay([r, res(2, 14)]).calls, 0);
+  assert.equal(replay([r, res(2, 14)]).total, 0);
+  assert.deepEqual(replay([{ seq: 1, kind: 'refuse', code: 7, job: '' }]).rows, [{ seq: 1, kind: 'refused', job: '?', code: '?', cents: 0 }]);
+  const t = replay([res(1, 14, { bytes: 3000 }), set(1, 3, { tokens: { in: 812, out: 1 } }), res(2, 14, { bytes: 'x' }), set(2, 3, { tokens: { in: -1 } }), res(3, 14), set(3, 3, { tokens: 'x' })]).charges;
+  assert.deepEqual(t.map((c) => [c.bytes, c.tokensIn]), [[3000, 812], [null, null], [null, null]]);
 });
 
 test('replay: a refusal at the stop latches the tier off, at the highest stop it was refused at', () => {
@@ -204,6 +218,28 @@ test('isOff and check: the stop first, then today\'s cap; exactly reaching a lim
   assert.equal(check(st(10, 0, 9500), '2026-11-09', 1, { ...cfg, stopCents: 9600 }).ok, true);
 });
 
+test('check: one call that could cost more than a whole day\'s cap is refused on its own, and latches nothing', () => {
+  const cfg = { ...DEFAULTS };
+  const st = { total: 0, days: {}, offAt: null };
+  assert.equal(check(st, '2026-11-09', 250, cfg).ok, true);
+  assert.equal(check(st, '2026-11-09', 251, cfg).code, 'big');
+  assert.equal(check(st, '2026-11-09', 251, cfg).why, "this one call could cost $2.51, more than a whole day's cap of $2.50: send a smaller request or a lower output limit");
+  assert.equal(check({ total: 9500, days: {}, offAt: null }, '2026-11-09', 251, cfg).code, 'big');
+  const huge = plan([], { job: 'teacher', evidence: GOOD, bytes: 20000000 }, {}, PRICES, AT, true).entry;
+  assert.equal(huge.code, 'big');
+  assert.equal(replay([huge]).offAt, null);
+  assert.equal(plan([huge], { job: 'teacher', evidence: GOOD, bytes: 3000 }, {}, PRICES, AT, true).ok, true, 'a small call after a big refusal still goes');
+});
+
+test('cleanEvidence: the ledger keeps the evidence in its known shape only', () => {
+  assert.deepEqual(W.cleanEvidence({ tier1: { asked: true, answered: false, what: 'x'.repeat(300), prompt: 'secret' }, tier2: { tried: 3, passed: 0, model: 'qwen2.5:7b', dropped: ['a', 5, 'b', 'c', 'd', 'e', 'f'], answer: 'no' }, extra: 1 }),
+    { tier1: { asked: true, answered: false, what: 'x'.repeat(200) }, tier2: { tried: 3, passed: 0, model: 'qwen2.5:7b', dropped: ['a', 'b', 'c', 'd', 'e'] } });
+  assert.deepEqual(W.cleanEvidence(null), { tier1: { asked: false, answered: false, what: null }, tier2: { tried: null, passed: null, model: null, dropped: [] } });
+  assert.deepEqual(W.cleanEvidence({ tier1: { asked: 'yes', answered: 1 }, tier2: { tried: -1, passed: 1.5, model: 7, dropped: 'x' } }), { tier1: { asked: false, answered: false, what: null }, tier2: { tried: null, passed: null, model: null, dropped: [] } });
+  assert.deepEqual(W.cleanEvidence({ tier1: { asked: true, answered: true }, tier2: { tried: 0, passed: 0 } }).tier1, { asked: true, answered: true, what: null });
+  assert.equal(JSON.stringify(plan([], { job: 'teacher', evidence: { ...GOOD, prompt: 'the whole prompt' }, bytes: 10 }, {}, PRICES, AT, true).entry).includes('the whole prompt'), false);
+});
+
 test('escalate (K1): only when tier 1 was asked and had no answer, and tier 2 tried with nothing passing', () => {
   assert.deepEqual(escalate(GOOD), { ok: true, why: '' });
   assert.equal(escalate({ tier1: { asked: true, answered: false }, tier2: { tried: 1, passed: 0 } }).ok, true);
@@ -223,7 +259,7 @@ test('plan: a reservation of the whole ceiling before anything goes out, or a re
   const req = { job: 'teacher', evidence: GOOD, bytes: 3000 };
   const p = plan([res(4, 9)], req, {}, PRICES, AT, true);
   assert.equal(p.ok, true);
-  assert.deepEqual(p.entry, { seq: 5, at: AT, day: '2026-11-09', job: 'teacher', spentToday: 9, spentTotal: 9, kind: 'reserve', model: 'claude-opus-5-5', effort: 'medium', maxTokens: 6000, bytes: 3000, ceilingCents: 14, dayCents: 250, stopCents: 9500, evidence: GOOD });
+  assert.deepEqual(p.entry, { seq: 5, at: AT, day: '2026-11-09', job: 'teacher', spentToday: 9, spentTotal: 9, kind: 'reserve', model: 'claude-opus-5-5', effort: 'medium', maxTokens: 6000, bytes: 3000, ceilingCents: 14, dayCents: 250, stopCents: 9500, evidence: { tier1: { asked: true, answered: false, what: null }, tier2: { tried: 2, passed: 0, model: null, dropped: [] } } });
   assert.equal(plan([], req, { dayCents: 300, stopCents: 9000 }, PRICES, AT, true).entry.dayCents, 300);
   assert.equal(plan([], req, { dayCents: 300, stopCents: 9000 }, PRICES, AT, true).entry.stopCents, 9000);
   assert.equal(p.cfg.dayCents, 250);
@@ -265,6 +301,9 @@ test('settle: priced from the usage the API reported; anything unreadable is cha
   assert.equal(none.tokens, null);
   assert.equal(settle(r, { ...reply, usage: { input_tokens: 'x' } }, PRICES, AT).costCents, 14);
   assert.equal(settle(r, { ...reply, model: 'claude-sonnet-5-5' }, PRICES, AT).costCents, 14);
+  assert.equal(settle(r, { ...reply, model: 'claude-opus-5-5-20261101' }, PRICES, AT).costCents, 2, 'a dated name of the model asked for is the same model');
+  assert.equal(settle(r, { ...reply, model: 'claude-opus-5-5x' }, PRICES, AT).costCents, 14);
+  assert.equal(settle(r, { ...reply, model: 5 }, PRICES, AT).costCents, 14);
   assert.equal(settle({ ...r, model: 'nope' }, { ...reply, model: 'nope' }, PRICES, AT).costCents, 14);
   assert.equal(settle(r, { ...reply, stop_reason: 5 }, PRICES, AT).stop, 'no reply');
   assert.equal(settle(r, { ...reply, stop_reason: 'refusal' }, PRICES, AT).stop, 'refusal');
@@ -290,9 +329,10 @@ test('toTally (K4): kar-tally\'s own kernel re-adds the ledger to the same total
   const L = [res(1, 14), set(1, 3), { seq: 2, kind: 'refuse', code: 'tier' }, res(3, 14), set(3, 13), res(4, 14)];
   const t = toTally(L, {});
   assert.deepEqual(t, { cap: 95, startSeq: 1, entries: [
-    { seq: 1, actor: 'kar', action: 'api:teacher#1', cost: 0.03, balance: 94.97 },
-    { seq: 2, actor: 'kar', action: 'api:teacher#3', cost: 0.13, balance: 94.84 },
-    { seq: 3, actor: 'kar', action: 'api:teacher#4', cost: 0.14, balance: 94.7 }] });
+    { seq: 1, actor: 'kar', action: 'api:teacher', cost: 0.03, balance: 94.97 },
+    { seq: 2, actor: 'kar', action: 'refused:tier:?', cost: 0, balance: 94.97 },
+    { seq: 3, actor: 'kar', action: 'api:teacher', cost: 0.13, balance: 94.84 },
+    { seq: 4, actor: 'kar', action: 'api:teacher', cost: 0.14, balance: 94.7 }] });
   const a = verifyLedger(t.cap, t.startSeq, t.entries);
   assert.equal(a.verdict, 'PASS');
   assert.equal(Math.round(a.totalSpent * 100), replay(L).total);
@@ -300,7 +340,14 @@ test('toTally (K4): kar-tally\'s own kernel re-adds the ledger to the same total
   assert.equal(verifyLedger(bad.cap, bad.startSeq, bad.entries).verdict, 'FAIL');
   assert.equal(toTally(L, { dayCents: 0 }).cap, 95);
   assert.equal(toTally(L, { stopCents: 9000 }).cap, 90);
-  assert.deepEqual(toTally([res(9, 5), res(3, 7)], {}).entries.map((e) => e.action), ['api:teacher#3', 'api:teacher#9']);
+  assert.deepEqual(toTally([res(9, 5), res(3, 7)], {}).entries.map((e) => e.seq), [3, 9]);
+  // a line deleted from the ledger is a break in the numbering, and kar-tally catches it; so is a first line that is not 1
+  const gone = toTally(L.filter((e) => e.kind !== 'refuse'), {});
+  assert.equal(verifyLedger(gone.cap, gone.startSeq, gone.entries).verdict, 'FAIL');
+  assert.match(verifyLedger(gone.cap, gone.startSeq, gone.entries).violations[0].message, /sequence break: expected seq 2, found 3/);
+  const head = toTally(L.filter((e) => e.seq !== 1), {});
+  assert.equal(verifyLedger(head.cap, head.startSeq, head.entries).verdict, 'FAIL');
+  assert.equal(toTally([{ seq: 1, kind: 'refuse', code: 'key', job: 'teacher' }], {}).entries[0].action, 'refused:key:teacher');
 });
 
 test('findSecrets (K6): counts strings shaped like an Anthropic key', () => {
@@ -312,7 +359,7 @@ test('findSecrets (K6): counts strings shaped like an Anthropic key', () => {
 });
 
 test('the default export carries every part', () => {
-  for (const k of ['DEFAULTS', 'EFFORTS', 'NANO_PER_CENT', 'KEY_SHAPE', 'config', 'rate', 'cents', 'tokens', 'costCents', 'ceiling', 'bytesOf', 'dayOf', 'replay', 'isOff', 'check', 'escalate', 'plan', 'settle', 'brief', 'toTally', 'findSecrets'])
+  for (const k of ['DEFAULTS', 'EFFORTS', 'NANO_PER_CENT', 'KEY_SHAPE', 'config', 'rate', 'cents', 'tokens', 'costCents', 'ceiling', 'bytesOf', 'dayOf', 'replay', 'isOff', 'check', 'cleanEvidence', 'escalate', 'plan', 'settle', 'brief', 'toTally', 'findSecrets'])
     assert.ok(k in W, k);
 });
 

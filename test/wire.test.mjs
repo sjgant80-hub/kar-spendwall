@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { spawn } from 'node:child_process';
 import { mkdtempSync, writeFileSync, readFileSync, existsSync, rmSync, utimesSync, mkdirSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { tmpdir, homedir } from 'node:os';
 import { join } from 'node:path';
 import { randomBytes } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
@@ -115,7 +115,14 @@ test('refusals go in the ledger and nothing goes out: no evidence, today\'s cap,
   assert.equal(t.o.ok, false);
   assert.equal(t.o.code, 'tier');
   mkdirSync(b.api, { recursive: true });
+  // a cap of 1 cent: this call's ceiling alone is more than a whole day's cap, so it is refused as too big
   writeFileSync(join(b.api, 'settings.json'), JSON.stringify({ dayCents: 1, stopCents: 9500 }));
+  const big = await ask(b, { job: 'teacher', evidence: GOOD, prompt: PROMPT });
+  assert.equal(big.o.code, 'big');
+  // a cap that exactly fits the call, with one cent already spent today: refused for the day
+  const want = W.ceiling(W.rate(PRICES, 'claude-opus-5-5'), W.bytesOf(['', PROMPT]), W.DEFAULTS), now = new Date().toISOString();
+  writeFileSync(join(b.api, 'settings.json'), JSON.stringify({ dayCents: want, stopCents: 9500 }));
+  writeFileSync(join(b.api, 'ledger.jsonl'), readFileSync(join(b.api, 'ledger.jsonl'), 'utf8') + JSON.stringify({ seq: 3, at: now, day: now.slice(0, 10), kind: 'reserve', job: 'earlier', ceilingCents: 1 }) + '\n');
   const d = await ask(b, { job: 'teacher', evidence: GOOD, prompt: PROMPT });
   assert.equal(d.o.code, 'day');
   writeFileSync(join(b.api, 'settings.json'), '{}');
@@ -128,8 +135,8 @@ test('refusals go in the ledger and nothing goes out: no evidence, today\'s cap,
   assert.equal(g.o.code, 'size');
   assert.equal(hits.length, 0, 'no request went out for any refusal');
   const L = entries(g.ledger);
-  assert.deepEqual(L.map((e) => [e.seq, e.kind, e.code]), [[1, 'refuse', 'tier'], [2, 'refuse', 'day'], [3, 'refuse', 'key'], [4, 'refuse', 'size'], [5, 'refuse', 'size']]);
-  for (const r of [t, d, k, z, g]) noKey(r);
+  assert.deepEqual(L.map((e) => [e.seq, e.kind, e.code]), [[1, 'refuse', 'tier'], [2, 'refuse', 'big'], [3, 'reserve', undefined], [4, 'refuse', 'day'], [5, 'refuse', 'key'], [6, 'refuse', 'size'], [7, 'refuse', 'size']]);
+  for (const r of [t, big, d, k, z, g]) noKey(r);
   rmSync(b.dir, { recursive: true, force: true });
 });
 
@@ -170,5 +177,13 @@ test('the lock: a live lock refuses, a lock older than ten minutes is cleared; a
   assert.equal(existsSync(lock), false);
   const bad = await ask(b, { job: 'teacher', evidence: GOOD, prompt: PROMPT }, ['--loopback', 'nope']);
   assert.equal(bad.o.code, 'args');
+  // test mode never touches the real key or the real ledger: the real key can only ever go to Anthropic's API
+  hits = [];
+  const realKey = await ask(b, { job: 'teacher', evidence: GOOD, prompt: PROMPT }, [], join(homedir(), '.si-didy', 'keys', 'anthropic-api.key'));
+  assert.equal(realKey.o.code, 'args');
+  assert.match(realKey.o.why, /never the real ones/);
+  const realDir = await ask({ ...b, api: join(homedir(), '.si-didy', 'api') }, { job: 'teacher', evidence: GOOD, prompt: PROMPT });
+  assert.equal(realDir.o.code, 'args');
+  assert.equal(hits.length, 0, 'nothing went out');
   rmSync(b.dir, { recursive: true, force: true });
 });

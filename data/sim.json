@@ -19,7 +19,7 @@
  "start": "2026-11-10",
  "ledger": {
   "entries": 5033,
-  "sha256": "244add8b4ad39931aff08622bea1581e51c00cce22a044ad457ae1b876ae1d19"
+  "sha256": "9f4c81c47d5b36d443e1ff95c7a3c1ce4b421e1932e33b5c08b86002f3005f94"
  },
  "measured": {
   "days": [
@@ -835,7 +835,7 @@
    {
     "id": "O",
     "pass": true,
-    "measured": "0 overruns"
+    "measured": "0 overruns; 0 of 1222 answered calls read more input tokens than bytes plus the allowance (the ceiling assumes none do)"
    }
   ]
  }

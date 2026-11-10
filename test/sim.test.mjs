@@ -26,8 +26,8 @@ test('run: the simulated ledger is the same every time (pinned)', () => {
   assert.equal(sim.days.length, 60);
   assert.equal(sim.days[0].day, '2026-11-10');
   assert.equal(sim.days[59].day, '2027-01-08');
-  assert.equal(sha(sim), '8d2f8eb5812872507b1ebd5df6430756e3b211bb63b968994d96771c2f4b370a');
-  assert.equal(sha(run({ prices: PRICES, days: 3, seed: 5, settings: { dayCents: 100 } })), '87144e2450d130c997e267375b8481cb5ccdb729b9add042fce11a1cc83cd9a4');
+  assert.equal(sha(sim), '2f32717cd60de9ef23c14b10cf202121483f0637d1a8bb9762e9541ca020a8c6');
+  assert.equal(sha(run({ prices: PRICES, days: 3, seed: 5, settings: { dayCents: 100 } })), 'db8a2964c842424a8d5c1ee373090ef5b80d616956d7ab264bafe2fb71d1af52');
   assert.ok(sim.ledger.every((e) => W.dayOf(e.at) !== null));
   assert.ok(sim.ledger.filter((e) => e.kind === 'reserve').every((e) => e.day === W.dayOf(e.at)));
   const s = W.replay(sim.ledger);
