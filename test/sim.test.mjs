@@ -26,8 +26,8 @@ test('run: the simulated ledger is the same every time (pinned)', () => {
   assert.equal(sim.days.length, 60);
   assert.equal(sim.days[0].day, '2026-11-10');
   assert.equal(sim.days[59].day, '2027-01-08');
-  assert.equal(sha(sim), '2f32717cd60de9ef23c14b10cf202121483f0637d1a8bb9762e9541ca020a8c6');
-  assert.equal(sha(run({ prices: PRICES, days: 3, seed: 5, settings: { dayCents: 100 } })), 'db8a2964c842424a8d5c1ee373090ef5b80d616956d7ab264bafe2fb71d1af52');
+  assert.equal(sha(sim), '943f2084da708e0086e6a4458e9099922e3595aab7b6fc8d6166a088c5f6f920');
+  assert.equal(sha(run({ prices: PRICES, days: 3, seed: 5, settings: { dayCents: 100 } })), '98ed4d7c8e8e962edafee5c058a1598ed0cb92133ec8c0fb97a453f6c48eb033');
   assert.ok(sim.ledger.every((e) => W.dayOf(e.at) !== null));
   assert.ok(sim.ledger.filter((e) => e.kind === 'reserve').every((e) => e.day === W.dayOf(e.at)));
   const s = W.replay(sim.ledger);
@@ -41,7 +41,7 @@ test('measure + verdicts: every claim the simulation decides holds on the pinned
   const v = verdicts(m);
   assert.deepEqual(v.map((x) => x.id), ['K1', 'K2', 'K3', 'K4', 'O']);
   for (const x of v) assert.equal(x.pass, true, x.id + ' ' + x.what);
-  assert.equal(sha(m), 'ed2b9bd17b76cc352951101c5705b28c861a865250ad6eeaec3f0146a746b41b');
+  assert.equal(sha(m), '66e6450671d950a3723b6e11acdc309c0eab7a7539295458ff7390e4490a1f36');
   assert.ok(m.k2.refusedForDay > 0 && m.k3.refusedForStop > 0 && m.k1.requestsWithoutEvidence > 0);
   assert.equal(m.k3.callsAfterOff, 0);
   assert.equal(m.k4.tally, 'PASS');

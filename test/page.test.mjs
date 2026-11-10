@@ -60,6 +60,9 @@ test('the wire keeps its promises in its own source: one address, no retry, the 
   assert.match(ask, /if \(k\.toUpperCase\(\)\.startsWith\('ANTHROPIC_'\)\) delete process\.env\[k\]/);
   assert.match(ask, /maxRetries: 0/);
   assert.match(ask, /const DIR = LOOP < 0 \? REAL_DIR : /, 'for real, the ledger is at its fixed place');
+  assert.match(ask, /const HOME = userInfo\(\)\.homedir;/, 'the home folder the operating system reports, not HOME or USERPROFILE');
+  assert.equal(/import \{[^}]*\bhomedir\b/.test(ask), false, 'os.homedir is not even imported');
+  assert.match(read('tools/audit.mjs'), /const HOME = userInfo\(\)\.homedir;/, 'the audit reads the same fixed places');
   assert.match(ask, /const KEYFILE = LOOP < 0 \? REAL_KEY : /, 'for real, the key is at its fixed place');
   assert.match(ask, /same\(KEYFILE, REAL_KEY\) \|\| same\(DIR, REAL_DIR\)/, 'the test mode refuses the real key and the real ledger');
   assert.match(ask, /new Anthropic\(\{ apiKey: key, baseURL: endpoint, maxRetries: 0, timeout: 240000 \}\)/);

@@ -159,8 +159,8 @@ test('replay: a call counts at its ceiling until it is settled, then at what it 
   assert.equal(s.overruns, 0);
   assert.deepEqual(s.open, [2, 8]);
   assert.equal(s.offAt, null);
-  assert.deepEqual(s.charges, [{ seq: 1, job: 'teacher', day: '2026-11-09', cents: 3, bytes: null, tokensIn: null }, { seq: 2, job: 'teacher', day: '2026-11-09', cents: 14, bytes: null, tokensIn: null },
-    { seq: 7, job: '?', day: '2026-11-09', cents: 10, bytes: null, tokensIn: null }, { seq: 8, job: '?', day: '2026-11-09', cents: 10, bytes: null, tokensIn: null }]);
+  assert.deepEqual(s.charges, [{ seq: 1, job: 'teacher', day: '2026-11-09', cents: 3, bytes: null, frame: null, tokensIn: null }, { seq: 2, job: 'teacher', day: '2026-11-09', cents: 14, bytes: null, frame: null, tokensIn: null },
+    { seq: 7, job: '?', day: '2026-11-09', cents: 10, bytes: null, frame: null, tokensIn: null }, { seq: 8, job: '?', day: '2026-11-09', cents: 10, bytes: null, frame: null, tokensIn: null }]);
   assert.deepEqual(s.rows.map((r) => [r.seq, r.kind, r.code, r.cents]), [[1, 'call', 'settled', 3], [2, 'call', 'unsettled', 14], [3, 'refused', 'day', 0], [7, 'call', 'settled', 10], [8, 'call', 'unsettled', 10]]);
   assert.equal(replay([res(1, 14), set(1, 15)]).overruns, 1);
   assert.equal(replay([res(1, 14), set(1, 15)]).total, 15);
@@ -184,8 +184,10 @@ test('replay: one line owns each seq; a second claim on a taken seq is skipped, 
   assert.equal(replay([r, res(2, 14)]).calls, 0);
   assert.equal(replay([r, res(2, 14)]).total, 0);
   assert.deepEqual(replay([{ seq: 1, kind: 'refuse', code: 7, job: '' }]).rows, [{ seq: 1, kind: 'refused', job: '?', code: '?', cents: 0 }]);
-  const t = replay([res(1, 14, { bytes: 3000 }), set(1, 3, { tokens: { in: 812, out: 1 } }), res(2, 14, { bytes: 'x' }), set(2, 3, { tokens: { in: -1 } }), res(3, 14), set(3, 3, { tokens: 'x' })]).charges;
-  assert.deepEqual(t.map((c) => [c.bytes, c.tokensIn]), [[3000, 812], [null, null], [null, null]]);
+  // every input token counts against the one-token-per-byte bound: plain input, cache writes and cache reads
+  const t = replay([res(1, 14, { bytes: 3000, frame: 256 }), set(1, 3, { tokens: { in: 812, out: 1, write: 100, read: 50 } }), res(2, 14, { bytes: 'x', frame: -1 }), set(2, 3, { tokens: { in: 5, out: 1, write: -1, read: 0 } }),
+    res(3, 14), set(3, 3, { tokens: 'x' }), res(4, 14), set(4, 3, { tokens: { in: 5, out: 1, write: 0 } })]).charges;
+  assert.deepEqual(t.map((c) => [c.bytes, c.frame, c.tokensIn]), [[3000, 256, 962], [null, null, null], [null, null, null], [null, null, null]]);
 });
 
 test('replay: a refusal at the stop latches the tier off, at the highest stop it was refused at', () => {
@@ -210,11 +212,11 @@ test('isOff and check: the stop first, then today\'s cap; exactly reaching a lim
   assert.equal(check(st(0, 0), '2026-11-10', 250, cfg).ok, true);
   assert.equal(check(st(9486, 0), '2026-11-09', 14, cfg).ok, true);
   assert.equal(check(st(9487, 0), '2026-11-09', 14, cfg).code, 'stop');
-  assert.match(check(st(9487, 0), '2026-11-09', 14, cfg).why, /past Kar's stop at \$95\.00/);
+  assert.equal(check(st(9487, 0), '2026-11-09', 14, cfg).why, 'the API tier is off: this call could take the total past the stop at $95.00');
   assert.equal(check(st(9487, 240), '2026-11-09', 14, cfg).code, 'stop');
   assert.equal(check(st(9500, 0), '2026-11-09', 1, cfg).code, 'off');
   assert.equal(check(st(10, 0, 9500), '2026-11-09', 1, cfg).code, 'off');
-  assert.equal(check(st(1234, 0, 9500), '2026-11-09', 1, cfg).why, 'the API tier is off: $12.34 of the $100.00 credit is spent and Kar stops at $95.00, until Simon raises the stop');
+  assert.equal(check(st(1234, 0, 9500), '2026-11-09', 1, cfg).why, 'the API tier is off: $12.34 of the $100.00 credit is spent and the stop is $95.00, until the stop is raised');
   assert.equal(check(st(10, 0, 9500), '2026-11-09', 1, { ...cfg, stopCents: 9600 }).ok, true);
 });
 
@@ -259,9 +261,10 @@ test('plan: a reservation of the whole ceiling before anything goes out, or a re
   const req = { job: 'teacher', evidence: GOOD, bytes: 3000 };
   const p = plan([res(4, 9)], req, {}, PRICES, AT, true);
   assert.equal(p.ok, true);
-  assert.deepEqual(p.entry, { seq: 5, at: AT, day: '2026-11-09', job: 'teacher', spentToday: 9, spentTotal: 9, kind: 'reserve', model: 'claude-opus-5-5', effort: 'medium', maxTokens: 6000, bytes: 3000, ceilingCents: 14, dayCents: 250, stopCents: 9500, evidence: { tier1: { asked: true, answered: false, what: null }, tier2: { tried: 2, passed: 0, model: null, dropped: [] } } });
+  assert.deepEqual(p.entry, { seq: 5, at: AT, day: '2026-11-09', job: 'teacher', spentToday: 9, spentTotal: 9, kind: 'reserve', model: 'claude-opus-5-5', effort: 'medium', maxTokens: 6000, bytes: 3000, ceilingCents: 14, frame: 256, dayCents: 250, stopCents: 9500, evidence: { tier1: { asked: true, answered: false, what: null }, tier2: { tried: 2, passed: 0, model: null, dropped: [] } } });
   assert.equal(plan([], req, { dayCents: 300, stopCents: 9000 }, PRICES, AT, true).entry.dayCents, 300);
   assert.equal(plan([], req, { dayCents: 300, stopCents: 9000 }, PRICES, AT, true).entry.stopCents, 9000);
+  assert.equal(plan([], req, { frame: 10 }, PRICES, AT, true).entry.frame, 10);
   assert.equal(p.cfg.dayCents, 250);
   const no = (entries, r, s, at, key) => plan(entries, r, s, PRICES, at, key).entry;
   assert.deepEqual(no([], req, {}, 'never', true), { seq: 1, at: 'never', day: null, job: 'teacher', spentToday: 0, spentTotal: 0, kind: 'refuse', code: 'clock', why: 'no readable time for this call', stopCents: 9500 });
@@ -315,11 +318,11 @@ test('settle: priced from the usage the API reported; anything unreadable is cha
 
 test('brief: the morning line, from the ledger alone', () => {
   const L = [res(1, 14), set(1, 3), res(2, 14), { seq: 3, kind: 'refuse', code: 'day', stopCents: 9500 }, res(4, 10, { job: 'cold-read' }), set(4, 2)];
-  assert.equal(brief(L, {}, AT), 'API tier: today $0.19 of $2.50 · $0.19 of the $100.00 credit spent, $94.81 left before Kar stops at $95.00 · 3 calls, 1 refused · by job: cold-read $0.02, teacher $0.17 · 1 unsettled, counted at the ceiling');
+  assert.equal(brief(L, {}, AT), 'API tier: today $0.19 of $2.50 · $0.19 of the $100.00 credit spent, $94.81 left before the stop at $95.00 · 3 calls, 1 refused · by job: cold-read $0.02, teacher $0.17 · 1 unsettled, counted at the ceiling');
   assert.equal(brief(L, {}, '2026-11-10T08:00:00Z').startsWith('API tier: today $0.00 of $2.50'), true);
   assert.equal(brief(L, {}, 'never').startsWith('API tier: today $0.00'), true);
-  assert.equal(brief([], {}, AT), 'API tier: today $0.00 of $2.50 · $0.00 of the $100.00 credit spent, $95.00 left before Kar stops at $95.00 · 0 calls, 0 refused');
-  assert.equal(brief([res(1, 9500)], {}, AT), 'API tier OFF: $95.00 of the $100.00 credit is spent (Kar stops at $95.00); Kar runs on the free tiers until Simon raises the stop · 1 calls, 0 refused · by job: teacher $95.00 · 1 unsettled, counted at the ceiling');
+  assert.equal(brief([], {}, AT), 'API tier: today $0.00 of $2.50 · $0.00 of the $100.00 credit spent, $95.00 left before the stop at $95.00 · 0 calls, 0 refused');
+  assert.equal(brief([res(1, 9500)], {}, AT), 'API tier OFF: $95.00 of the $100.00 credit is spent (the stop is $95.00); the free tiers carry on until the stop is raised · 1 calls, 0 refused · by job: teacher $95.00 · 1 unsettled, counted at the ceiling');
   assert.match(brief([{ seq: 1, kind: 'refuse', code: 'stop', stopCents: 9500 }], {}, AT), /^API tier OFF: \$0\.00/);
   assert.match(brief([res(1, 14), set(1, 15)], {}, AT), / · 1 OVERRUN$/);
   assert.equal(brief([], { dayCents: 0 }, AT), 'API tier: the settings are refused (the daily cap must be a whole number of cents, at least 1), so no call can be made');

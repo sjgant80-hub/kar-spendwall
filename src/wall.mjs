@@ -111,7 +111,8 @@ export function replay(entries) {
     } else if (e.kind === 'settle' && res.has(e.seq) && !res.get(e.seq).done && nat(e.costCents) !== null) {
       const r = res.get(e.seq);
       r.cost = e.costCents; r.done = true; s.settled++;
-      r.tokensIn = isObj(e.tokens) ? nat(e.tokens.in) : null;
+      const k = isObj(e.tokens) ? [nat(e.tokens.in), nat(e.tokens.write), nat(e.tokens.read)] : [null];
+      r.tokensIn = k.includes(null) ? null : k[0] + k[1] + k[2];
       if (e.costCents > r.e.ceilingCents) s.overruns++;
     } else if (e.kind === 'refuse' && !taken) {
       refs.set(e.seq, { seq: e.seq, kind: 'refused', job: typeof e.job === 'string' && e.job ? e.job : '?', code: typeof e.code === 'string' ? e.code : '?', cents: 0 });
@@ -124,7 +125,7 @@ export function replay(entries) {
     s.days[e.day] = (s.days[e.day] || 0) + cost;
     s.jobs[job] = (s.jobs[job] || 0) + cost;
     s.total += cost;
-    s.charges.push({ seq: e.seq, job, day: e.day, cents: cost, bytes: nat(e.bytes), tokensIn });
+    s.charges.push({ seq: e.seq, job, day: e.day, cents: cost, bytes: nat(e.bytes), frame: nat(e.frame), tokensIn });
     s.rows.push({ seq: e.seq, kind: 'call', job, code: done ? 'settled' : 'unsettled', cents: cost });
     if (!done) s.open.push(e.seq);
   }
@@ -134,7 +135,7 @@ export function replay(entries) {
   return s;
 }
 
-/** isOff(s, cfg) → the stop is reached, or a call was refused at this stop (it latches until Simon raises the stop). */
+/** isOff(s, cfg) → the stop is reached, or a call was refused at this stop (it latches until the stop is raised). */
 export function isOff(s, cfg) {
   return s.total >= cfg.stopCents || (s.offAt !== null && s.offAt >= cfg.stopCents);
 }
@@ -143,8 +144,8 @@ export function isOff(s, cfg) {
 export function check(s, day, need, cfg) {
   const act = { type: 'api', cost: need };
   if (need > cfg.dayCents) return { ok: false, code: 'big', why: 'this one call could cost ' + money(need) + ', more than a whole day\'s cap of ' + money(cfg.dayCents) + ': send a smaller request or a lower output limit' };
-  if (isOff(s, cfg)) return { ok: false, code: 'off', why: 'the API tier is off: ' + money(s.total) + ' of the ' + money(cfg.creditCents) + ' credit is spent and Kar stops at ' + money(cfg.stopCents) + ', until Simon raises the stop' };
-  if (!canDo({ caps: ['api'], budget: { total: cfg.stopCents, spent: s.total } }, act).ok) return { ok: false, code: 'stop', why: 'the API tier is off: this call could take the total past Kar\'s stop at ' + money(cfg.stopCents) };
+  if (isOff(s, cfg)) return { ok: false, code: 'off', why: 'the API tier is off: ' + money(s.total) + ' of the ' + money(cfg.creditCents) + ' credit is spent and the stop is ' + money(cfg.stopCents) + ', until the stop is raised' };
+  if (!canDo({ caps: ['api'], budget: { total: cfg.stopCents, spent: s.total } }, act).ok) return { ok: false, code: 'stop', why: 'the API tier is off: this call could take the total past the stop at ' + money(cfg.stopCents) };
   if (!canDo({ caps: ['api'], budget: { total: cfg.dayCents, spent: s.days[day] || 0 } }, act).ok) return { ok: false, code: 'day', why: 'API budget reached for today (' + money(cfg.dayCents) + '): the local tiers carry on, and the API is back tomorrow' };
   return { ok: true, code: 'ok', why: '' };
 }
@@ -186,7 +187,7 @@ export function plan(entries, req, settings, prices, at, haveKey) {
   const need = ceiling(r, req.bytes, cfg);
   const k = check(s, day, need, cfg);
   if (!k.ok) return no(k.code, k.why);
-  return { ok: true, cfg, entry: { ...base, kind: 'reserve', model: cfg.model, effort: cfg.effort, maxTokens: cfg.maxTokens, bytes: req.bytes, ceilingCents: need, dayCents: cfg.dayCents, stopCents: cfg.stopCents, evidence: cleanEvidence(req.evidence) } };
+  return { ok: true, cfg, entry: { ...base, kind: 'reserve', model: cfg.model, effort: cfg.effort, maxTokens: cfg.maxTokens, bytes: req.bytes, ceilingCents: need, frame: cfg.frame, dayCents: cfg.dayCents, stopCents: cfg.stopCents, evidence: cleanEvidence(req.evidence) } };
 }
 
 /** settle(reserve, reply, prices, at) → the entry to append once the API answers or fails. A reply with no readable
@@ -207,8 +208,8 @@ export function brief(entries, settings, now) {
   if (!c.ok) return 'API tier: the settings are refused (' + c.why + '), so no call can be made';
   const cfg = c.cfg, s = replay(entries), day = dayOf(now), today = day ? s.days[day] || 0 : 0;
   const head = isOff(s, cfg)
-    ? 'API tier OFF: ' + money(s.total) + ' of the ' + money(cfg.creditCents) + ' credit is spent (Kar stops at ' + money(cfg.stopCents) + '); Kar runs on the free tiers until Simon raises the stop'
-    : 'API tier: today ' + money(today) + ' of ' + money(cfg.dayCents) + ' · ' + money(s.total) + ' of the ' + money(cfg.creditCents) + ' credit spent, ' + money(cfg.stopCents - s.total) + ' left before Kar stops at ' + money(cfg.stopCents);
+    ? 'API tier OFF: ' + money(s.total) + ' of the ' + money(cfg.creditCents) + ' credit is spent (the stop is ' + money(cfg.stopCents) + '); the free tiers carry on until the stop is raised'
+    : 'API tier: today ' + money(today) + ' of ' + money(cfg.dayCents) + ' · ' + money(s.total) + ' of the ' + money(cfg.creditCents) + ' credit spent, ' + money(cfg.stopCents - s.total) + ' left before the stop at ' + money(cfg.stopCents);
   const jobs = Object.keys(s.jobs).sort().map((j) => j + ' ' + money(s.jobs[j])).join(', ');
   return head + ' · ' + s.calls + ' calls, ' + s.refused + ' refused' + (jobs ? ' · by job: ' + jobs : '')
     + (s.overruns ? ' · ' + s.overruns + ' OVERRUN' : '') + (s.open.length ? ' · ' + s.open.length + ' unsettled, counted at the ceiling' : '');

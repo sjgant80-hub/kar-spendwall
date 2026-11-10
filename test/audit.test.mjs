@@ -15,7 +15,13 @@ const rows = (L) => Object.fromEntries(audit(L, verifyLedger).rows.map((r) => [r
 const pass = (L) => Object.fromEntries(audit(L, verifyLedger).rows.map((r) => [r.id, r.pass]));
 
 test('an empty ledger and an honest one pass every row', () => {
-  assert.deepEqual(pass([]), { K1: true, K2: true, K3: true, K4: true, O: true });
+  // nothing to judge is not a pass: with no call yet, the rows are undecided
+  assert.deepEqual(pass([]), { K1: null, K2: null, K3: null, K4: null, O: null });
+  assert.deepEqual(rows([]).K1.measured, 'no call yet');
+  const refusalsOnly = audit([{ seq: 1, kind: 'refuse', code: 'key', job: 'teacher' }, { seq: 2, kind: 'refuse', code: 'key', job: 'teacher' }], verifyLedger);
+  assert.deepEqual(refusalsOnly.rows.map((r) => [r.id, r.pass]), [['K1', null], ['K2', null], ['K3', null], ['K4', true], ['O', null]]);
+  assert.equal(pass([null, 'junk']).K4, false, 'a ledger of nothing but garbage is not empty: K4 fails it');
+  assert.equal(pass([{ seq: 1, kind: 'refuse', code: 'key' }, { seq: 3, kind: 'refuse', code: 'key' }]).K4, false, 'a gap among refusals fails too');
   const a = audit([res(1, 14), set(1, 3), { seq: 2, kind: 'refuse', code: 'day', stopCents: 9500 }, res(3, 14)], verifyLedger);
   assert.equal(a.calls, 2);
   assert.equal(a.refused, 1);
@@ -68,10 +74,13 @@ test('K4 and O: an unreadable line, an overrun; kar-tally re-adds past a raised 
   assert.equal(pass([res(1, 14), set(1, 15)]).O, false);
   assert.equal(rows([res(1, 14), set(1, 15)]).O.measured, '1 overruns; no answered call yet to check the one-token-per-byte bound on');
   // the one assumption under the ceiling, checked on every answered call: input tokens never more than bytes + 256
-  const tok = (n) => [res(1, 14, { bytes: 100 }), { ...set(1, 3), tokens: { in: n, out: 1, write: 0, read: 0 } }];
+  const tok = (n, frame) => [res(1, 14, { bytes: 100, ...(frame === undefined ? {} : { frame }) }), { ...set(1, 3), tokens: { in: n, out: 1, write: 0, read: 0 } }];
   assert.equal(pass(tok(356)).O, true);
   assert.equal(rows(tok(356)).O.measured, '0 overruns; 0 of 1 answered calls read more input tokens than bytes plus the allowance (the ceiling assumes none do)');
   assert.equal(pass(tok(357)).O, false);
+  assert.equal(pass(tok(110, 10)).O, true, 'the allowance the call was reserved under is the one checked');
+  assert.equal(pass(tok(111, 10)).O, false);
+  assert.equal(pass([res(1, 14, { bytes: 100 }), { ...set(1, 3), tokens: { in: 300, out: 1, write: 50, read: 7 } }]).O, false, 'cache tokens count as input too');
   // a call with a size but no answer yet, or an answer but no size, is not an answered call to check the bound on
   assert.equal(rows([res(1, 14, { bytes: 100 })]).O.measured, '0 overruns; no answered call yet to check the one-token-per-byte bound on');
   assert.equal(pass([res(1, 14), { ...set(1, 3), tokens: { in: 900, out: 1, write: 0, read: 0 } }]).O, true);

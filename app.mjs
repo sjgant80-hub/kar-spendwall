@@ -71,13 +71,13 @@ function claims() {
     esc('In sixty simulated days the dearest day spent ' + usd(m.k2.dearestDayCents) + ' under a ' + usd(m.k2.capCents) + ' cap and the total stopped at ' + usd(m.k3.totalCents) + ' under a ' + usd(m.k3.stopCents) + ' stop. ' + (REAL && REAL.calls ? 'The real ledger has ' + REAL.calls + ' calls.' : 'The real ledger has no call yet.') + ' O stays open until real calls decide it.');
   $('faq-failed').textContent = failed.length ? 'Failed and kept on the record: ' + failed.map((r) => r[0] + ' (' + r[2] + ')').join('; ') + '.' : 'No decided claim has failed. O is open: it needs real calls. The limits are in the white paper.';
   $('faq-overrun').textContent = REAL && REAL.calls ? 'On the real ledger: ' + (real.O ? real.O.measured : '—') + '.' : 'No real call has been made yet, so there is no real figure. The simulation cannot overrun by design, and the morning audit checks the real ledger for overruns every day.';
-  $('faq-who').textContent = 'Kar, on its own credit, first' + (REAL && REAL.calls ? ': ' + REAL.calls + ' real calls so far.' : ', and no real call has been made yet: the API key is not installed.') + ' No outside team yet; this is the showcase.';
+  $('faq-who').textContent = 'Kar, on its own credit, first' + (REAL && REAL.calls ? ': ' + REAL.calls + ' real calls so far.' : ', and no real call has been made yet' + (REAL && REAL.keyInstalled === false ? ': no API key was installed when the receipt was written.' : '.')) + ' No outside team yet; this is the showcase.';
 }
 
 function realSection() {
   if (!REAL) { $('real').textContent = 'The real-ledger receipt did not load.'; return; }
-  $('real').textContent = 'The real ledger lives on Kar\'s own machine, never in this repository; Kar\'s morning brief judges it by the same rules every session, and tools/audit.mjs --write publishes the result here. Last written ' + REAL.at + ': ' +
-    (REAL.present ? REAL.calls + ' calls, ' + REAL.refused + ' refusals, ' + usd(REAL.totalCents) + ' charged.' : 'there is no ledger yet, because no call has been attempted.') + (REAL.calls ? '' : ' The tier stays off until the API key is installed.');
+  $('real').textContent = 'The real ledger lives on Kar\'s own machine, never in this repository; Kar\'s morning brief judges it by the same rules every session. tools/audit.mjs --write, run and committed by hand, puts the result here; this receipt was written ' + REAL.at + ': ' +
+    (REAL.present ? REAL.calls + ' calls, ' + REAL.refused + ' refusals, ' + usd(REAL.totalCents) + ' charged.' : 'there is no ledger yet, because no call has been attempted.') + (REAL.calls ? '' : REAL.keyInstalled ? ' A key is installed; no call has been made yet.' : ' No API key was installed when it was written, so the tier was off.');
 }
 
 function settings() {
@@ -155,7 +155,7 @@ function tryOne() {
   const evidence = { tier1: { asked: $('t-asked').checked, answered: $('t-answered').checked }, tier2: { tried: num('t-tried', 0, 1000), passed: num('t-passed', 0, 1000) } };
   const p = W.plan(L, { job: 'teacher', evidence, bytes: num('t-bytes', 0, 1e9) }, {}, PRICES, at, $('t-key').checked);
   const out = $('t-out');
-  if (p.ok) { out.className = 'readout'; out.textContent = 'Reserved ' + usd(p.entry.ceilingCents) + ' before anything goes out: the most this call can cost. Today then stands at ' + usd(today + p.entry.ceilingCents) + ' of ' + usd(p.cfg.dayCents) + ' until the answer settles it at what it really cost.'; }
+  if (p.ok) { out.className = 'readout'; out.textContent = 'Reserved ' + usd(p.entry.ceilingCents) + ' before anything goes out: the most this call can cost, if it reads no more tokens than its bytes plus the allowance. Today then stands at ' + usd(today + p.entry.ceilingCents) + ' of ' + usd(p.cfg.dayCents) + ' until the answer settles it at what it really cost.'; }
   else { out.className = 'readout no'; out.textContent = 'Refused (' + p.entry.code + '): ' + p.entry.why + '. Nothing is sent; the refusal goes in the ledger.'; }
 }
 

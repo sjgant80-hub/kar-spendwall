@@ -12,7 +12,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { readFileSync, openSync, writeSync, fsyncSync, closeSync, existsSync, mkdirSync, unlinkSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { homedir } from 'node:os';
+import { userInfo } from 'node:os';
 import W from '../src/wall.mjs';
 
 for (const k of Object.keys(process.env)) if (k.toUpperCase().startsWith('ANTHROPIC_')) delete process.env[k];
@@ -21,7 +21,9 @@ for (const k of Object.keys(process.env)) if (k.toUpperCase().startsWith('ANTHRO
 // the environment can move them, so no variable can start a fresh, empty ledger or point the key somewhere else.
 // For this repository's own test (--loopback PORT): the request goes to 127.0.0.1, the ledger and a FAKE key come from
 // KAR_SPENDWALL_DIR and KAR_SPENDWALL_KEYFILE, and the real key file is refused, so the real key never leaves for a port.
-const HOME = homedir();
+// the home folder as the operating system reports it: os.homedir() would follow HOME / USERPROFILE, which any
+// environment can set, and a fresh home means a fresh, empty ledger
+const HOME = userInfo().homedir;
 const REAL_DIR = join(HOME, '.si-didy', 'api'), REAL_KEY = join(HOME, '.si-didy', 'keys', 'anthropic-api.key');
 const LOOP = process.argv.indexOf('--loopback');
 const endpoint = (() => {

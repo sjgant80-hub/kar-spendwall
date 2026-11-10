@@ -4,8 +4,9 @@
 //   K1  every call carried the evidence that the cheaper tiers were tried and failed
 //   K2  no UTC day's charged spend above the highest cap in force on that day; nothing settled before it was reserved
 //   K3  the total never above the stop in force; no call after a refusal at the stop, unless the stop was raised since
-//   K4  nothing unreadable in the ledger, and kar-tally (injected) re-adds the calls to the same total
-//   O   no call cost more than its ceiling
+//   K4  nothing unreadable in the ledger, and kar-tally (injected) re-adds every numbered line to the same total
+//   O   no call cost more than its ceiling, and no answer read more input tokens than its bytes plus the allowance
+// With no call yet, K1, K2, K3 and O are undecided (null); K4 is undecided only for an empty ledger.
 import W from './wall.mjs';
 
 const isObj = (x) => x !== null && typeof x === 'object' && !Array.isArray(x);
@@ -35,15 +36,17 @@ export function audit(entries, tally) {
   const a = t.entries.length ? tally(t.cap, t.startSeq, t.entries) : { verdict: 'PASS', violations: [], totalSpent: 0 };
   const tallied = Math.round(a.totalSpent * 100);
   const sized = s.charges.filter((c) => c.bytes !== null && c.tokensIn !== null);
-  const over = sized.filter((c) => c.tokensIn > c.bytes + W.DEFAULTS.frame).length;
+  const over = sized.filter((c) => c.tokensIn > c.bytes + (c.frame === null ? W.DEFAULTS.frame : c.frame)).length;
+  // with no call yet there is nothing to judge: a row is undecided (null), never held on nothing
+  const open = (row) => (s.calls === 0 ? { ...row, pass: null, measured: 'no call yet' } : row);
   return {
     calls: s.calls, refused: s.refused, totalCents: s.total,
     rows: [
-      { id: 'K1', pass: noEvidence === 0, measured: noEvidence + ' of ' + s.calls + ' calls without the evidence' },
-      { id: 'K2', pass: overDays.length === 0 && early === 0, measured: (overDays.length ? 'over the cap on ' + overDays.join(', ') : 'no day over its cap') + ', ' + early + ' settled before reserved' },
-      { id: 'K3', pass: s.total <= stopNow && afterOff === 0, measured: usd(s.total) + ' charged, the stop ' + usd(stopNow) + ', ' + afterOff + ' calls after a refusal at the stop' },
-      { id: 'K4', pass: s.skipped === 0 && a.verdict === 'PASS' && tallied === s.total, measured: 'kar-tally ' + a.verdict + ', ' + usd(tallied) + ' re-added of ' + usd(s.total) + ', ' + s.skipped + ' unreadable lines' },
-      { id: 'O', pass: s.overruns === 0 && over === 0, measured: s.overruns + ' overruns; ' + (sized.length ? over + ' of ' + sized.length + ' answered calls read more input tokens than bytes plus the allowance (the ceiling assumes none do)' : 'no answered call yet to check the one-token-per-byte bound on') },
+      open({ id: 'K1', pass: noEvidence === 0, measured: noEvidence + ' of ' + s.calls + ' calls without the evidence' }),
+      open({ id: 'K2', pass: overDays.length === 0 && early === 0, measured: (overDays.length ? 'over the cap on ' + overDays.join(', ') : 'no day over its cap') + ', ' + early + ' settled before reserved' }),
+      open({ id: 'K3', pass: s.total <= stopNow && afterOff === 0, measured: usd(s.total) + ' charged, the stop ' + usd(stopNow) + ', ' + afterOff + ' calls after a refusal at the stop' }),
+      { id: 'K4', pass: (Array.isArray(entries) ? entries.length : 0) === 0 ? null : s.skipped === 0 && a.verdict === 'PASS' && tallied === s.total, measured: 'kar-tally ' + a.verdict + ', ' + usd(tallied) + ' re-added of ' + usd(s.total) + ', ' + s.skipped + ' unreadable lines' },
+      open({ id: 'O', pass: s.overruns === 0 && over === 0, measured: s.overruns + ' overruns; ' + (sized.length ? over + ' of ' + sized.length + ' answered calls read more input tokens than bytes plus the allowance (the ceiling assumes none do)' : 'no answered call yet to check the one-token-per-byte bound on') }),
     ],
   };
 }

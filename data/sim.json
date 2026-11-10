@@ -19,7 +19,7 @@
  "start": "2026-11-10",
  "ledger": {
   "entries": 5033,
-  "sha256": "9f4c81c47d5b36d443e1ff95c7a3c1ce4b421e1932e33b5c08b86002f3005f94"
+  "sha256": "ab857dd0f0f90d543d0277bb863f04d069b0cfb9e0ae6ec03fa5cc1f11c981aa"
  },
  "measured": {
   "days": [
@@ -778,7 +778,7 @@
   "o": {
    "overruns": 0
   },
-  "brief": "API tier OFF: $94.90 of the $100.00 credit is spent (Kar stops at $95.00); Kar runs on the free tiers until Simon raises the stop · 1275 calls, 2515 refused · by job: teacher $94.90 · 32 unsettled, counted at the ceiling"
+  "brief": "API tier OFF: $94.90 of the $100.00 credit is spent (the stop is $95.00); the free tiers carry on until the stop is raised · 1275 calls, 2515 refused · by job: teacher $94.90 · 32 unsettled, counted at the ceiling"
  },
  "verdicts": [
   {

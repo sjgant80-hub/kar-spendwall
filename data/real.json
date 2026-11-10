@@ -1,34 +1,35 @@
 {
- "at": "2026-11-09",
+ "at": "2026-11-10",
  "present": false,
+ "keyInstalled": false,
  "calls": 0,
  "refused": 0,
  "totalCents": 0,
  "rows": [
   {
    "id": "K1",
-   "pass": true,
-   "measured": "0 of 0 calls without the evidence"
+   "pass": null,
+   "measured": "no call yet"
   },
   {
    "id": "K2",
-   "pass": true,
-   "measured": "no day over its cap, 0 settled before reserved"
+   "pass": null,
+   "measured": "no call yet"
   },
   {
    "id": "K3",
-   "pass": true,
-   "measured": "$0.00 charged, the stop $0.00, 0 calls after a refusal at the stop"
+   "pass": null,
+   "measured": "no call yet"
   },
   {
    "id": "K4",
-   "pass": true,
+   "pass": null,
    "measured": "kar-tally PASS, $0.00 re-added of $0.00, 0 unreadable lines"
   },
   {
    "id": "O",
-   "pass": true,
-   "measured": "0 overruns; no answered call yet to check the one-token-per-byte bound on"
+   "pass": null,
+   "measured": "no call yet"
   }
  ]
 }
